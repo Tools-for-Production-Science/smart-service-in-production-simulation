@@ -68,11 +68,7 @@ namespace ProduktionssystemSimulation
                     }
                 }
 
-                if (ReworkQuantity > 0)
-                {
-                    env.Log("START REWORK");
-                    env.Process(ReviewRework.Rework(env, ReworkQuantity));
-                }
+               
                 if (ReproductionQuantity > 0)
                 {
                     int i = 1;
@@ -103,18 +99,42 @@ namespace ProduktionssystemSimulation
             // var wait = env.Now - arrive;
             // env.Log("{0} {1}: waited {2}", env.Now, name, wait);
             yield return ProcessPre = env.Process(Preprocess.ProductionStep(env, mPre, reqPre, product.ID, position.ProductionTimePreProcess));
-            var reqMain = mMain.Request();
-            yield return reqMain;
-            // var wait2 = env.Now - arrive;
-            // env.Log("{0} {1}: waited {2}", env.Now, name, wait2);
-            yield return ProcessMain = env.Process(Mainprocess.ProductionStep(env, mMain, reqMain, product.ID, position.sroductionTimeMainProcess));
-            var reqPost = mPost.Request();
-            yield return reqPost;
-            // var wait3 = env.Now - arrive;
-            yield return ProcessPost = env.Process(Postprocess.ProductionStep(env, mPost, reqPost, product.ID, position.ProductionTimePostProcess));
-            var quantities = ReviewRework.Review(env, ReworkQuantity, ReproductionQuantity);
-            ReworkQuantity = quantities.Item1;
-            ReproductionQuantity = quantities.Item2;
+            yield return env.Process(ReviewRework.ReviewPre(env, product));
+            if (product.Broken)
+            {
+                product.Broken = false;
+                env.Log("Start new production of product {0}", product.ID);
+                yield return env.Process(Production(env, mPre, mMain, mPost, product, position));
+            }
+            else
+            {
+                var reqMain = mMain.Request();
+                yield return reqMain;
+                // var wait2 = env.Now - arrive;
+                // env.Log("{0} {1}: waited {2}", env.Now, name, wait2);
+                yield return ProcessMain = env.Process(Mainprocess.ProductionStep(env, mMain, reqMain, product.ID, position.ProductionTimeMainProcess));
+                yield return env.Process(ReviewRework.ReviewMain(env, product));
+                if (product.Broken)
+                {
+                    product.Broken = false;
+                    env.Log("Start new production of product {0}", product.ID);
+                    yield return env.Process(Production(env, mPre, mMain, mPost, product, position));
+                }
+                else
+                {
+                    var reqPost = mPost.Request();
+                    yield return reqPost;
+                    // var wait3 = env.Now - arrive;
+                    yield return ProcessPost = env.Process(Postprocess.ProductionStep(env, mPost, reqPost, product.ID, position.ProductionTimePostProcess));
+                    yield return env.Process(ReviewRework.ReviewPost(env, product));
+                    if (product.Broken)
+                    {
+                        product.Broken = false;
+                        env.Log("Start new production of product {0}", product.ID);
+                        yield return env.Process(Production(env, mPre, mMain, mPost, product, position));
+                    }
+                }
+            }
         }
 
         public IEnumerable<Event> BreakMachinePreprocess(Simulation env)

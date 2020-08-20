@@ -72,21 +72,7 @@ namespace ProduktionssystemSimulation
                             break;
                     }
 
-                    Console.WriteLine("Maschinen Leerlaufzeit:");
-                    Console.WriteLine("\ty - Yes");
-                    Console.WriteLine("\tn - No");
-
-                    switch (Console.ReadLine())
-                    {
-                        case "j":
-                            Console.WriteLine("Maschinen Leerlaufzeit wird verbessert");
-                            SmartService.Leerlaufzeit = 1;
-                            break;
-                        case "n":
-                            Console.WriteLine("Maschinen Leerlaufzeit wird nicht beeinflusst");
-                            SmartService.Leerlaufzeit = 0;
-                            break;
-                    }
+                    
                     break;
                 case "n":
                     SmartService = new SmartService(1, 0, 0, TimeSpan.FromDays(0), 0, 0, 0);

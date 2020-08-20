@@ -6,12 +6,12 @@ namespace ProduktionssystemSimulation
 {
     public class Preprocess
     {
-        Simulation env;
+        Simulation Env;
         TimeSpan RepairTime;
        
         public Preprocess(Simulation env)
         {
-            this.env = env;
+            Env = env;
             // fix
             // hier noch Parameter die eingelesen werden übergeben und setzten
             RepairTime = TimeSpan.FromMinutes(30);
@@ -34,7 +34,5 @@ namespace ProduktionssystemSimulation
             machine.Release(req);
             env.Log("{0} ProductNo {1}: Machine Preprocess is finished", env.Now, id);
         }
-
-        
     }
 }

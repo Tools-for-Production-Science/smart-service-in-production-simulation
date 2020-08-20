@@ -16,7 +16,7 @@ namespace ProduktionssystemSimulation
         private static int _ausfallwkeit = 0;
         private static int _maschinenReparaturzeit = 0;
         private static int _ausschuss = 0;
-        private static int _leerlauf = 0;
+        private static TimeSpan _leerlauf = TimeSpan.FromMinutes(0);
         private static TimeSpan _laufzeit;
 
         public double Effektausmaß { get => _effektausmaß; set => _effektausmaß = value; }
@@ -30,8 +30,6 @@ namespace ProduktionssystemSimulation
         public int MaschinenAusfallwkeit { get => _ausfallwkeit; set => _ausfallwkeit = value; }
         public int Ausschuss { get => _ausschuss; set => _ausschuss = value; }
         public int MaschinenReparaturzeit { get => _maschinenReparaturzeit; set => _maschinenReparaturzeit = value; }
-        public int Leerlaufzeit { get => _leerlauf; set => _leerlauf = value; }
-
         public TimeSpan Laufzeit { get => _laufzeit; set => _laufzeit = value; }
 
         public SmartService(double effektausmaß, double fixkosten, double varKosten, TimeSpan laufzeit, double preis, double mindAbnahme, double maxAbnahme)

@@ -8,7 +8,6 @@ namespace ProduktionssystemSimulation
     {
         Simulation Env;
         TimeSpan RepairTime;
-        TimeSpan Mttf;
 
         public Postprocess(Simulation env)
         {
