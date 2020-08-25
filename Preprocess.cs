@@ -17,11 +17,10 @@ namespace ProduktionssystemSimulation
             RepairTime = TimeSpan.FromMinutes(30);
         }
 
-        public IEnumerable<Event> ProductionStep(Simulation env, Resource machine, Request req, int id, TimeSpan productionTime)
+        public IEnumerable<Event> ProductionStep(Simulation env, Resource machine, Request req, Product product)
         {
-            env.Log("{0} ProductNo {1}: Machine Preprocess is in production", env.Now, id);
-
-            yield return env.Timeout(productionTime);
+            env.Log("{0} ProductNo {1}: Machine Preprocess is in production", env.Now, product.ID);
+            yield return env.TimeoutNormalPositive(product.ProductionTimePreMean, product.ProductionTimePreSigma);
             if (env.ActiveProcess.HandleFault())
             {
                 ProcessControl.BrokenPre = true;
@@ -32,7 +31,7 @@ namespace ProduktionssystemSimulation
                 ProcessControl.BrokenPre = false;
             }
             machine.Release(req);
-            env.Log("{0} ProductNo {1}: Machine Preprocess is finished", env.Now, id);
+            env.Log("{0} ProductNo {1}: Machine Preprocess is finished", env.Now, product.ID);
         }
     }
 }

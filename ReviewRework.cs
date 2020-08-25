@@ -8,28 +8,30 @@ namespace ProduktionssystemSimulation
     static class ReviewRework
     {
 
-        static double SpoiltRatioPre = 0.15;
+        static double ScrapRatioPre = 0.15;
         static double ReworkRatioPre = 0.1;
-        static double SpoiltRatioMain = 0.15;
+        static double ScrapRatioMain = 0.15;
         static double ReworkRatioMain = 0.1;
-        static double SpoiltRatioPost = 0.15;
+        static double ScrapRatioPost = 0.15;
         static double ReworkRatioPost = 0.1;
 
         public static IEnumerable<Event> ReviewPre(Simulation env, Product product)
         {
             env.Log("Review after Preprocess");
-            // 0 bis 0.1: Nacharbeit
-            // >0.1 bis 0.15: Ausschuss
+            ScrapRatioPre = env.RandNormalPositive(product.ScrapPreMean, product.ScrapPreSigma);
+            // 0 bis ScrapRatio: Scrap
+            // >ScrapRatio bis ReworkRatio+ScrapRatio: Rework
             var reviewRatio = env.RandUniform(0, 1);
-            if (reviewRatio > 0 && reviewRatio <= SpoiltRatioPre)
+            if (reviewRatio > 0 && reviewRatio <= ScrapRatioPre)
+            {
+                env.Log("Scrap: Product {0}", product.ID);
+                product.Broken = true;
+               
+            }
+            else if (reviewRatio > ScrapRatioPre && reviewRatio <= ReworkRatioPre+ScrapRatioPre)
             {
                 env.Log("Rework: Product {0}", product.ID);
                 yield return env.Process(Rework(env, product));
-            }
-            else if (reviewRatio > SpoiltRatioPre && reviewRatio <= ReworkRatioPre)
-            {
-                env.Log("Spoilt: Product {0}", product.ID);
-                product.Broken = true;
             } else
             {
                 env.Log("End of review. Product {0} corresponds to the quality", product.ID);
@@ -42,15 +44,16 @@ namespace ProduktionssystemSimulation
             // 0 bis 0.1: Nacharbeit
             // >0.1 bis 0.15: Ausschuss
             var reviewRatio = env.RandUniform(0, 1);
-            if (reviewRatio > 0 && reviewRatio <= SpoiltRatioMain)
+            if (reviewRatio > 0 && reviewRatio <= ScrapRatioMain)
+            {
+                env.Log("Scrap: Product {0}", product.ID);
+                product.Broken = true;
+                
+            }
+            else if (reviewRatio > ScrapRatioMain && reviewRatio <= ReworkRatioMain+ScrapRatioMain)
             {
                 env.Log("Rework: Product {0}", product.ID);
                 yield return env.Process(Rework(env, product));
-            }
-            else if (reviewRatio > SpoiltRatioMain && reviewRatio <= ReworkRatioMain)
-            {
-                env.Log("Spoilt: Product {0}", product.ID);
-                product.Broken = true;
             }
             else
             {
@@ -64,15 +67,16 @@ namespace ProduktionssystemSimulation
             // 0 bis 0.1: Nacharbeit
             // >0.1 bis 0.15: Ausschuss
             var reviewRatio = env.RandUniform(0, 1);
-            if (reviewRatio > 0 && reviewRatio <= SpoiltRatioPost)
+            if (reviewRatio > 0 && reviewRatio <= ScrapRatioPost)
+            {
+                env.Log("Scrap: Product {0}", product.ID);
+                product.Broken = true;
+                
+            }
+            else if (reviewRatio > ScrapRatioPost && reviewRatio <= ReworkRatioPost+ScrapRatioPost)
             {
                 env.Log("Rework: Product {0}", product.ID);
                 yield return env.Process(Rework(env, product));
-            }
-            else if (reviewRatio > SpoiltRatioPost && reviewRatio <= ReworkRatioPost)
-            {
-                env.Log("Spoilt: Product {0}", product.ID);
-                product.Broken = true;
             }
             else
             {

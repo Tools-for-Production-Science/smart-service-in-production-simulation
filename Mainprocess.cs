@@ -15,11 +15,11 @@ namespace ProduktionssystemSimulation
             RepairTime = TimeSpan.FromMinutes(30 * (1 - smartService.Effektausmaß * smartService.MaschinenAusfallwkeit));
         }
 
-        public IEnumerable<Event> ProductionStep(Simulation env, Resource machine, Request req, int id, TimeSpan productionTime)
+        public IEnumerable<Event> ProductionStep(Simulation env, Resource machine, Request req, Product product)
         {
-            env.Log("{0} ProductNo {1}: Machine Mainprocess is in production", env.Now, id);
+            env.Log("{0} ProductNo {1}: Machine Mainprocess is in production", env.Now, product.ID);
 
-            yield return env.Timeout(productionTime);
+            yield return env.TimeoutNormalPositive(product.ProductionTimeMainMean, product.ProductionTimeMainSigma);
             if (env.ActiveProcess.HandleFault())
             {
                 ProcessControl.BrokenMain = true;
@@ -30,7 +30,7 @@ namespace ProduktionssystemSimulation
                 ProcessControl.BrokenMain = false;
             }
             machine.Release(req);
-            env.Log("{0} ProductNo {1}: Machine Mainprocess is finished", env.Now, id);
+            env.Log("{0} ProductNo {1}: Machine Mainprocess is finished", env.Now, product.ID);
         }
 
         

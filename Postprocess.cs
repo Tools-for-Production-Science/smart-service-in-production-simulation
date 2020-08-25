@@ -18,11 +18,11 @@ namespace ProduktionssystemSimulation
             RepairTime = TimeSpan.FromMinutes(30);
         }
 
-        public IEnumerable<Event> ProductionStep(Simulation env, Resource machine, Request req, int id, TimeSpan productionTime)
+        public IEnumerable<Event> ProductionStep(Simulation env, Resource machine, Request req, Product product)
         {
-            env.Log("{0} ProductNo {1}: Machine Postprocess is in production", env.Now, id);
+            env.Log("{0} ProductNo {1}: Machine Postprocess is in production", env.Now, product.ID);
 
-            yield return env.Timeout(productionTime);
+            yield return env.TimeoutNormalPositive(product.ProductionTimePostMean, product.ProductionTimePostSigma);
             if (env.ActiveProcess.HandleFault())
             {
                 ProcessControl.BrokenPost = true;
@@ -33,7 +33,7 @@ namespace ProduktionssystemSimulation
                 ProcessControl.BrokenPost = false;
             }
             machine.Release(req);
-            env.Log("{0} ProductNo {1}: Machine Postprocess is finished", env.Now, id);
+            env.Log("{0} ProductNo {1}: Machine Postprocess is finished", env.Now, product.ID);
         }
 
        
