@@ -7,14 +7,16 @@ namespace ProduktionssystemSimulation
     public class Preprocess
     {
         Simulation Env;
-        TimeSpan RepairTime;
+        double DowntimePreMean;
+        double DowntimePreSigma;
        
-        public Preprocess(Simulation env)
+        public Preprocess(Simulation env, double downtimepremean, double downtimepresigma)
         {
             Env = env;
             // fix
             // hier noch Parameter die eingelesen werden übergeben und setzten
-            RepairTime = TimeSpan.FromMinutes(30);
+            DowntimePreMean = downtimepremean;
+            DowntimePreSigma = downtimepresigma;
         }
 
         public IEnumerable<Event> ProductionStep(Simulation env, Resource machine, Request req, Product product)
@@ -26,7 +28,7 @@ namespace ProduktionssystemSimulation
                 ProcessControl.BrokenPre = true;
                 env.Log("Break Machine in Preprocess");
                 // Ausfalldauer für M
-                yield return env.Timeout(RepairTime);
+                yield return env.Timeout(TimeSpan.FromDays(env.RandNormalPositive(DowntimePreMean, DowntimePreSigma)));
                 env.Log("Machine in Preprocess repaired");
                 ProcessControl.BrokenPre = false;
             }

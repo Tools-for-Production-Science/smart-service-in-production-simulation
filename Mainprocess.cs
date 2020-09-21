@@ -7,12 +7,17 @@ namespace ProduktionssystemSimulation
     class Mainprocess
     {
         Simulation Env;
-        TimeSpan RepairTime;
+        TimeSpan Downtime;
+        SmartService SmartService;
+        double DowntimeMainMean;
+        double DowntimeMainSigma;
 
-        public Mainprocess(Simulation env, SmartService smartService)
+        public Mainprocess(Simulation env, SmartService smartService, double downtimemainmean, double downtimemainsigma)
         {
             Env = env;
-            RepairTime = TimeSpan.FromMinutes(30 * (1 - smartService.Effektausmaß * smartService.MaschinenAusfallwkeit));
+            SmartService = smartService;
+            DowntimeMainMean = downtimemainmean;
+            DowntimeMainSigma = downtimemainsigma;
         }
 
         public IEnumerable<Event> ProductionStep(Simulation env, Resource machine, Request req, Product product)
@@ -25,7 +30,8 @@ namespace ProduktionssystemSimulation
                 ProcessControl.BrokenMain = true;
                 env.Log("Break Machine in Mainprocess");
                 // Ausfalldauer für M
-                yield return env.Timeout(RepairTime);
+                Downtime = TimeSpan.FromMinutes(env.RandNormalPositive(DowntimeMainMean,DowntimeMainSigma) * (1 + SmartService.Downtime));
+                yield return env.Timeout(Downtime);
                 env.Log("Machine in Mainprocess repaired");
                 ProcessControl.BrokenMain = false;
             }

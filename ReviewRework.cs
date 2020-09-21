@@ -7,87 +7,75 @@ namespace ProduktionssystemSimulation
 {
     static class ReviewRework
     {
-
-        static double ScrapRatioPre = 0.15;
-        static double ReworkRatioPre = 0.1;
-        static double ScrapRatioMain = 0.15;
-        static double ReworkRatioMain = 0.1;
-        static double ScrapRatioPost = 0.15;
-        static double ReworkRatioPost = 0.1;
-
-        public static IEnumerable<Event> ReviewPre(Simulation env, Product product)
+        public static IEnumerable<Event> ReviewPre(Simulation env, Position position, Product product)
         {
             env.Log("Review after Preprocess");
-            ScrapRatioPre = env.RandNormalPositive(product.ScrapPreMean, product.ScrapPreSigma);
-            // 0 bis ScrapRatio: Scrap
-            // >ScrapRatio bis ReworkRatio+ScrapRatio: Rework
+            
             var reviewRatio = env.RandUniform(0, 1);
-            if (reviewRatio > 0 && reviewRatio <= ScrapRatioPre)
+
+            if (0 <= reviewRatio && reviewRatio < (1-(position.ScrapPreMean+position.ReworkPreMean)))
             {
-                env.Log("Scrap: Product {0}", product.ID);
-                product.Broken = true;
-               
+               env.Log("End of review. Product {0} corresponds to the quality", position.ID);
             }
-            else if (reviewRatio > ScrapRatioPre && reviewRatio <= ReworkRatioPre+ScrapRatioPre)
+            else if ((1 - (position.ScrapPreMean + position.ReworkPreMean))<= reviewRatio && reviewRatio < (1-position.ScrapPreMean))
             {
-                env.Log("Rework: Product {0}", product.ID);
+                env.Log("Rework: Product {0}", position.ID);
                 yield return env.Process(Rework(env, product));
             } else
-            {
-                env.Log("End of review. Product {0} corresponds to the quality", product.ID);
+            { 
+                env.Log("Scrap: Product {0}", position.ID);
+                product.Broken = true;
             }
         }
 
-        public static IEnumerable<Event> ReviewMain(Simulation env, Product product)
+        public static IEnumerable<Event> ReviewMain(Simulation env, Position position, Product product, SmartService smartService)
         {
             env.Log("Review after Mainprocess");
-            // 0 bis 0.1: Nacharbeit
-            // >0.1 bis 0.15: Ausschuss
+
             var reviewRatio = env.RandUniform(0, 1);
-            if (reviewRatio > 0 && reviewRatio <= ScrapRatioMain)
+
+            if (0 <= reviewRatio && reviewRatio < (1 - ((position.ScrapMainMean * (1+ smartService.Scrap))+ (position.ReworkMainMean * (1+smartService.Rework)))))
             {
-                env.Log("Scrap: Product {0}", product.ID);
-                product.Broken = true;
-                
+                env.Log("End of review. Product {0} corresponds to the quality", position.ID);
             }
-            else if (reviewRatio > ScrapRatioMain && reviewRatio <= ReworkRatioMain+ScrapRatioMain)
+            else if ((1 - ((position.ScrapMainMean * (1 + smartService.Scrap)) + (position.ReworkMainMean * (1 + smartService.Rework)))) <= reviewRatio && reviewRatio < (1 - (position.ScrapMainMean * (1 + smartService.Scrap))))
             {
-                env.Log("Rework: Product {0}", product.ID);
+                env.Log("Rework: Product {0}", position.ID);
                 yield return env.Process(Rework(env, product));
             }
             else
             {
-                env.Log("End of review. Product {0} corresponds to the quality", product.ID);
+                env.Log("Scrap: Product {0}", position.ID);
+                product.Broken = true;
             }
         }
 
-        public static IEnumerable<Event> ReviewPost(Simulation env, Product product)
+        public static IEnumerable<Event> ReviewPost(Simulation env, Position position, Product product)
         {
             env.Log("Review after Postprocess");
-            // 0 bis 0.1: Nacharbeit
-            // >0.1 bis 0.15: Ausschuss
+
             var reviewRatio = env.RandUniform(0, 1);
-            if (reviewRatio > 0 && reviewRatio <= ScrapRatioPost)
+
+            if (0 <= reviewRatio && reviewRatio < (1 - (position.ScrapPostMean + position.ReworkPostMean)))
             {
-                env.Log("Scrap: Product {0}", product.ID);
-                product.Broken = true;
-                
+                env.Log("End of review. Product {0} corresponds to the quality", position.ID);
             }
-            else if (reviewRatio > ScrapRatioPost && reviewRatio <= ReworkRatioPost+ScrapRatioPost)
+            else if ((1 - (position.ScrapPostMean + position.ReworkPostMean)) <= reviewRatio && reviewRatio < (1 - position.ScrapPostMean))
             {
-                env.Log("Rework: Product {0}", product.ID);
+                env.Log("Rework: Product {0}", position.ID);
                 yield return env.Process(Rework(env, product));
             }
             else
             {
-                env.Log("End of review. Product {0} corresponds to the quality", product.ID);
+                env.Log("Scrap: Product {0}", position.ID);
+                product.Broken = true;
             }
         }
 
         public static IEnumerable<Event> Rework(Simulation env, Product product)
         { 
             env.Log("Rework of Product {0}", product.ID);
-            yield return env.Timeout(TimeSpan.FromMinutes(10));
+            yield return env.TimeoutNormalPositive(product.ReworkTimeMean, product.ReworkTimeSigma);
             env.Log("Rework of Product {0} done", product.ID);
         }
     }

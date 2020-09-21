@@ -25,17 +25,22 @@ namespace ProduktionssystemSimulation
         public static Boolean BrokenPre = false;
         public static Boolean BrokenMain = false;
         public static Boolean BrokenPost = false;
+        int ProducedQuanity = 0;
+        Store ProducedProducts;
+        Store ProductsToProduce;
+        static Dictionary<string, double> Result = new Dictionary<string, double>();
 
-        public ProcessControl(List<Job> jobs, SmartService smartService)
+        public ProcessControl(List<Job> jobs, SmartService smartService, Dictionary<string, double> result)
         {
             Jobs = jobs;
             SmartService = smartService;
-            Preprocess = new Preprocess(env);
-            Mainprocess = new Mainprocess(env, smartService);
-            Postprocess = new Postprocess(env);
-            MttfPre = TimeSpan.FromMinutes(300 * (1 + smartService.Effektausmaß * smartService.MaschinenAusfallwkeit));
-            MttfMain = TimeSpan.FromMinutes(300 * (1 + smartService.Effektausmaß * smartService.MaschinenAusfallwkeit));
-            MttfPost = TimeSpan.FromMinutes(300 * (1 + smartService.Effektausmaß * smartService.MaschinenAusfallwkeit));
+            Preprocess = new Preprocess(env, Result["DowntimePreMean"], Result["DowntimePreSigma"]);
+            Mainprocess = new Mainprocess(env, smartService, Result["DowntimeMainMean"], Result["DowntimeMainSigma"]);
+            Postprocess = new Postprocess(env, Result["DowntimePostMean"], Result["DowntimePostSigma"]);
+            MttfPre = TimeSpan.FromMinutes(result["MTTFPre"]);
+            MttfMain = TimeSpan.FromMinutes(result["MTTFMain"] * (1 + result["MTTF"]));
+            MttfPost = TimeSpan.FromMinutes(result["MTTFPost"]);
+            Result = result;
         }
 
         public IEnumerable<Event> JobInProcess(Simulation env, Resource mPre, Resource mMain, Resource mPost, List<Job> jobs)
@@ -48,9 +53,6 @@ namespace ProduktionssystemSimulation
             }
             yield break;
         }
-        int ProducedQuanity = 0;
-        Store producedProducts;
-        Store pipe;
        
         public IEnumerable<Event> Setup(Simulation env, Resource mPre, Resource mMain, Resource mPost, Job job)
         {
@@ -58,8 +60,8 @@ namespace ProduktionssystemSimulation
             
             foreach (Position position in job.Positions)
             {
-                producedProducts = new Store(env, position.Quantity);
-                pipe = new Store(env);
+                ProducedProducts = new Store(env, position.QuantityMean);
+                ProductsToProduce = new Store(env);
                 ProducedQuanity = 0;
                
                 //SetUp
@@ -68,36 +70,28 @@ namespace ProduktionssystemSimulation
 
                 foreach (Product product in position.Products)
                 {
-                    pipe.Put(product);
+                    ProductsToProduce.Put(product);
                 }
-                
-                
-                    
-                   
-                while ( ProducedQuanity != position.Quantity)
+
+                while (ProducedQuanity != position.QuantityMean)
                 {
-                    getPipe = pipe.Get();
-                // warte bis ein neues Teil produziert werden muss, oder alle Teile schon produziert sind
-                    yield return getPipe | producedProducts.WhenFull();
-                    if (producedProducts.Count == position.Quantity)
+                    getPipe = ProductsToProduce.Get();
+                    // warte bis ein neues Teil produziert werden muss, oder alle Teile schon produziert sind
+                    yield return getPipe | ProducedProducts.WhenFull();
+                    if (ProducedProducts.Count == position.QuantityMean)
                     {
-                       break;
+                        break;
                     }
-                    
+
                     Product product = (Product)getPipe.Value;
-                 
-                    env.Process(Production(env, mPre, mMain, mPost, product, pipe));
 
-
-
-                }
-                    
-          
+                    env.Process(Production(env, mPre, mMain, mPost, position, product, ProductsToProduce));
+                } 
             }
             yield break;
         }
 
-        public IEnumerable<Event> Production(Simulation env, Resource mPre, Resource mMain, Resource mPost, Product product, Store pipe)
+        public IEnumerable<Event> Production(Simulation env, Resource mPre, Resource mMain, Resource mPost, Position position, Product product, Store pipe)
         {
             var arrive = env.Now;
             env.Log("{0} ProductNo {1}: Here I am", arrive, product.ID);
@@ -106,7 +100,7 @@ namespace ProduktionssystemSimulation
             // var wait = env.Now - arrive;
             // env.Log("{0} {1}: waited {2}", env.Now, name, wait);
             yield return ProcessPre = env.Process(Preprocess.ProductionStep(env, mPre, reqPre, product));
-            yield return env.Process(ReviewRework.ReviewPre(env, product));
+            yield return env.Process(ReviewRework.ReviewPre(env, position, product));
             if (product.Broken)
             {
                 product.Broken = false;
@@ -121,14 +115,13 @@ namespace ProduktionssystemSimulation
                 // var wait2 = env.Now - arrive;
                 // env.Log("{0} {1}: waited {2}", env.Now, name, wait2);
                 yield return ProcessMain = env.Process(Mainprocess.ProductionStep(env, mMain, reqMain, product));
-                yield return env.Process(ReviewRework.ReviewMain(env, product));
+                yield return env.Process(ReviewRework.ReviewMain(env, position, product, SmartService));
                 if (product.Broken)
                 {
                     product.Broken = false;
                     env.Log("Start new production of product {0}", product.ID);
                     pipe.Put(product);
                     yield break;
-
                 }
                 else
                 {
@@ -136,22 +129,20 @@ namespace ProduktionssystemSimulation
                     yield return reqPost;
                     // var wait3 = env.Now - arrive;
                     yield return ProcessPost = env.Process(Postprocess.ProductionStep(env, mPost, reqPost, product));
-                    yield return env.Process(ReviewRework.ReviewPost(env, product));
+                    yield return env.Process(ReviewRework.ReviewPost(env, position, product));
                     if (product.Broken)
                     {
                         product.Broken = false;
                         env.Log("Start new production of product {0}", product.ID);
                         pipe.Put(product);
                         yield break;
-
                     }
                     else
                     {
                         ProducedQuanity++;
-                        producedProducts.Put(product);
+                        ProducedProducts.Put(product);
                         Console.WriteLine("Produced quantity: " + ProducedQuanity);
                     }
-                    
                 }
             }
         }
@@ -165,7 +156,7 @@ namespace ProduktionssystemSimulation
                 yield return env.Timeout(ausfall);
                 if (ProcessPre != null && !BrokenPre && ProcessPre.IsOk && ProcessPre.IsAlive)
                 {
-                    env.Log("================================================================Break Machine Pre");
+                    env.Log("Break Machine Pre");
                     ProcessPre.Interrupt();
                 }
             }
@@ -179,7 +170,7 @@ namespace ProduktionssystemSimulation
                 yield return env.Timeout(ausfall);
                 if (ProcessMain != null && !BrokenMain && ProcessMain.IsOk && ProcessMain.IsAlive)
                 {
-                    env.Log("================================================================Break Machine Main");
+                    env.Log("Break Machine Main");
                     ProcessMain.Interrupt();   
                 }
             }
@@ -193,7 +184,7 @@ namespace ProduktionssystemSimulation
                 yield return env.Timeout(ausfall);
                 if (ProcessPost != null && !BrokenPost && ProcessPost.IsOk && ProcessPost.IsAlive)
                 {
-                    env.Log("================================================================Break Machine Post");
+                    env.Log("Break Machine Post");
                     ProcessPost.Interrupt();
                 }
             }

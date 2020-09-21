@@ -8,14 +8,14 @@ namespace ProduktionssystemSimulation
     {
         Simulation Env;
         TimeSpan RepairTime;
+        double DowntimePreMean;
+        double DowntimePreSigma;
 
-        public Postprocess(Simulation env)
+        public Postprocess(Simulation env, double downtimepremean, double downtimepresigma)
         {
             Env = env;
-            // fix
-            // hier noch Parameter die eingelesen werden übergeben und setzten
-
-            RepairTime = TimeSpan.FromMinutes(30);
+            DowntimePreMean = downtimepremean;
+            DowntimePreSigma = downtimepresigma;
         }
 
         public IEnumerable<Event> ProductionStep(Simulation env, Resource machine, Request req, Product product)
@@ -28,7 +28,7 @@ namespace ProduktionssystemSimulation
                 ProcessControl.BrokenPost = true;
                 env.Log("Break Machine Postprocess");
                 // Ausfalldauer für M
-                yield return env.Timeout(RepairTime);
+                yield return env.Timeout(TimeSpan.FromDays(env.RandNormalPositive(DowntimePreMean, DowntimePreSigma)));
                 env.Log("Machine in Postprocess repaired");
                 ProcessControl.BrokenPost = false;
             }
