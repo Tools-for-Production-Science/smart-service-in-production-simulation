@@ -16,7 +16,7 @@ namespace ProduktionssystemSimulation
         private static List<Double> GewinnOSS = new List<Double>();
         private static List<Position> Positions = new List<Position>();
         private static List<Product> Products = new List<Product>();
-        private static List<Job> Jobs = new List<Job>();
+        private static readonly List<Job> Jobs = new List<Job>();
         private static SmartService SmartService;
         static Dictionary<string, double> inputData = new Dictionary<string, double>();
         private static readonly Simulation env = new Simulation();
@@ -50,14 +50,6 @@ namespace ProduktionssystemSimulation
             Jobgenerator();
 
             SmartService = new SmartService(
-                inputData["ProbabilityOfOccurrence"], 
-                inputData["Fixcosts"], 
-                inputData["VariableCosts"], 
-                TimeSpan.FromDays(inputData["Duration"]), 
-                inputData["Price"], 
-                inputData["MindCapture"], 
-                inputData["MaxCapture"],
-                inputData["InvestmentCosts"],
                 inputData["Scrap"],
                 inputData["MTTF"],
                 inputData["Downtime"],
@@ -87,21 +79,13 @@ namespace ProduktionssystemSimulation
                 0,
                 0,
                 0,
-                TimeSpan.FromDays(0),
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
                 0
             );
             StreamWriter swKPIOSS = new StreamWriter("KPIOSS.csv");
             StreamWriter swGOSS = new StreamWriter("GewinnOSS.csv");
             while (i < inputData["Rounds"])
             {
-                ProcessControl pc = new ProcessControl(Jobs, SmartService, inputData, env);
+                ProcessControl pc = new ProcessControl(Jobs, SmartService, inputData, new Simulation());
                 var tupelKPIProfit = pc.Simulate();
                 GewinnOSS.Add(tupelKPIProfit.Item2);
                 swGOSS.WriteLine(tupelKPIProfit.Item2);

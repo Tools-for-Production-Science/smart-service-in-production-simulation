@@ -41,7 +41,7 @@ namespace ProduktionssystemSimulation
             Mainprocess = new Mainprocess(this, env, smartService, inputData["DowntimeMainMean"], inputData["DowntimeMainSigma"]);
             Postprocess = new Postprocess(this, env, inputData["DowntimePostMean"], inputData["DowntimePostSigma"]);
             MtbfPre = TimeSpan.FromDays(inputData["MTTFPre"]);
-            MtbfMain = TimeSpan.FromDays(inputData["MTTFMain"] * (1 + inputData["MTTF"]));
+            MtbfMain = TimeSpan.FromDays(inputData["MTTFMain"] * (1 + smartService.MTTF));
             MtbfPost = TimeSpan.FromDays(inputData["MTTFPost"]);
             InputData = inputData;
             Env = env;
