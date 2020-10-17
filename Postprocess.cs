@@ -23,7 +23,7 @@ namespace ProduktionssystemSimulation
         {
             Env.Log("{0} ProductNo {1}: Machine Postprocess is in production", Env.Now, product.ID);
             ProductionTime = Env.RandNormalPositive(product.ProductionTimePostMean, product.ProductionTimePostSigma);
-            analysis.APTPost += ProductionTime;
+            analysis.APTPost = analysis.APTPost.Add(ProductionTime);
             yield return Env.Timeout(ProductionTime);
             if (Env.ActiveProcess.HandleFault())
             {
@@ -31,7 +31,7 @@ namespace ProduktionssystemSimulation
                 Env.Log("Break Machine Postprocess");
                 // Ausfalldauer für M
                 Downtime = Env.RandLogNormal2(TimeSpan.FromDays(DowntimePostMean), TimeSpan.FromDays(DowntimePostSigma));
-                analysis.ADOTPost += Downtime;
+                analysis.ADOTPost = analysis.ADOTPost.Add(Downtime);
                 yield return Env.Timeout(Downtime);
                 Env.Log("Machine in Postprocess repaired");
                 ProcessControl.BrokenPost = false;

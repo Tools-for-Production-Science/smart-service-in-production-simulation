@@ -63,8 +63,6 @@ namespace ProduktionssystemSimulation
                 inputData["Downtime"],
                 inputData["Rework"]
             );
-            //ProcessControl pc = new ProcessControl(Jobs, SmartService, inputData, env);
-            //Console.WriteLine(pc.Simulate().Item2);
             // mit SS
             StreamWriter swKPISS = new StreamWriter("KPISS.csv");
             StreamWriter swGSS = new StreamWriter("GewinnSS.csv");

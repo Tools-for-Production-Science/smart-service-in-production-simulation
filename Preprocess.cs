@@ -25,7 +25,7 @@ namespace ProduktionssystemSimulation
         {
             Env.Log("{0} ProductNo {1}: Machine Preprocess is in production", Env.Now, product.ID);
             ProductionTime = Env.RandNormalPositive(product.ProductionTimePreMean, product.ProductionTimePreSigma);
-            analysis.APTPre += ProductionTime;
+            analysis.APTPre = analysis.APTPre.Add(ProductionTime);
             yield return Env.Timeout(ProductionTime);
             if (Env.ActiveProcess.HandleFault())
             {
@@ -33,7 +33,7 @@ namespace ProduktionssystemSimulation
                 Env.Log("Break Machine in Preprocess");
                 // Ausfalldauer für M
                 Downtime = Env.RandLogNormal2(TimeSpan.FromDays(DowntimePreMean), TimeSpan.FromDays(DowntimePreSigma));
-                analysis.ADOTPre += Downtime;
+                analysis.ADOTPre = analysis.ADOTPre.Add(Downtime);
                 yield return Env.Timeout(Downtime);
                 Env.Log("Machine in Preprocess repaired");
                 ProcessControl.BrokenPre = false;

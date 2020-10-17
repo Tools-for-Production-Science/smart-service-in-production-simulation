@@ -25,15 +25,15 @@ namespace ProduktionssystemSimulation
         {
             Env.Log("{0} ProductNo {1}: Machine Mainprocess is in production", Env.Now, product.ID);
             ProductionTime = Env.RandNormalPositive(product.ProductionTimeMainMean, product.ProductionTimeMainSigma);
-            analysis.APTMain += ProductionTime;
+            analysis.APTMain = analysis.APTMain.Add(ProductionTime);
             yield return Env.Timeout(ProductionTime);
             if (Env.ActiveProcess.HandleFault())
             {
                 ProcessControl.BrokenMain = true;
                 Env.Log("Break Machine in Mainprocess");
                 // Ausfalldauer für M
-                Downtime = TimeSpan.FromDays(Env.RandLogNormal2(DowntimeMainMean,DowntimeMainSigma) * (1 + SmartService.Downtime));
-                analysis.ADOTMain += Downtime;
+                Downtime = TimeSpan.FromDays(Env.RandLogNormal2(DowntimeMainMean,DowntimeMainSigma) * (1  - SmartService.Downtime));
+                analysis.ADOTMain = analysis.ADOTMain.Add(Downtime);
                 yield return Env.Timeout(Downtime);
                 Env.Log("Machine in Mainprocess repaired");
                 ProcessControl.BrokenMain = false;
