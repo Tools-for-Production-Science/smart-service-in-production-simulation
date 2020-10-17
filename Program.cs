@@ -68,7 +68,7 @@ namespace ProduktionssystemSimulation
             StreamWriter swGSS = new StreamWriter("GewinnSS.csv");
             while (i < inputData["Rounds"])
             {
-                ProcessControl pc = new ProcessControl(Jobs, SmartService, inputData, env);
+                ProcessControl pc = new ProcessControl(Jobs, SmartService, inputData, new Simulation());
                 var tupelKPIProfit = pc.Simulate();
                 GewinnSS.Add(tupelKPIProfit.Item2);
                 swGSS.WriteLine(tupelKPIProfit.Item2);
