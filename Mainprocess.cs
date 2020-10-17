@@ -11,6 +11,7 @@ namespace ProduktionssystemSimulation
         SmartService SmartService;
         double DowntimeMainMean;
         double DowntimeMainSigma;
+        TimeSpan ProductionTime;
 
         public Mainprocess(Simulation env, SmartService smartService, double downtimemainmean, double downtimemainsigma)
         {
@@ -20,23 +21,25 @@ namespace ProduktionssystemSimulation
             DowntimeMainSigma = downtimemainsigma;
         }
 
-        public IEnumerable<Event> ProductionStep(Simulation env, Resource machine, Request req, Product product)
+        public IEnumerable<Event> ProductionStep(Resource machine, Request req, Product product, Analysis analysis)
         {
-            env.Log("{0} ProductNo {1}: Machine Mainprocess is in production", env.Now, product.ID);
-
-            yield return env.TimeoutNormalPositive(product.ProductionTimeMainMean, product.ProductionTimeMainSigma);
-            if (env.ActiveProcess.HandleFault())
+            Env.Log("{0} ProductNo {1}: Machine Mainprocess is in production", Env.Now, product.ID);
+            ProductionTime = Env.RandNormalPositive(product.ProductionTimeMainMean, product.ProductionTimeMainSigma);
+            analysis.APTMain += ProductionTime;
+            yield return Env.Timeout(ProductionTime);
+            if (Env.ActiveProcess.HandleFault())
             {
                 ProcessControl.BrokenMain = true;
-                env.Log("Break Machine in Mainprocess");
+                Env.Log("Break Machine in Mainprocess");
                 // Ausfalldauer für M
-                Downtime = TimeSpan.FromMinutes(env.RandNormalPositive(DowntimeMainMean,DowntimeMainSigma) * (1 + SmartService.Downtime));
-                yield return env.Timeout(Downtime);
-                env.Log("Machine in Mainprocess repaired");
+                Downtime = TimeSpan.FromDays(Env.RandLogNormal2(DowntimeMainMean,DowntimeMainSigma) * (1 + SmartService.Downtime));
+                analysis.ADOTMain += Downtime;
+                yield return Env.Timeout(Downtime);
+                Env.Log("Machine in Mainprocess repaired");
                 ProcessControl.BrokenMain = false;
             }
             machine.Release(req);
-            env.Log("{0} ProductNo {1}: Machine Mainprocess is finished", env.Now, product.ID);
+            Env.Log("{0} ProductNo {1}: Machine Mainprocess is finished", Env.Now, product.ID);
         }
 
         

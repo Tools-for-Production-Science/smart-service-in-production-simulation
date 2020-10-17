@@ -32,7 +32,7 @@ namespace ProduktionssystemSimulation
         public TimeSpan Duration { get => _duration; set => _duration = value; }
         public double Rework { get => _rework; set => _rework = value; }
 
-        public SmartService(double probabilityOfOccurrence, double fixcosts, double varCosts, TimeSpan duration, double price, double mindCapture, double maxCapture, double scrap, double mTTF, double downtime, double rework, double investmentCosts)
+        public SmartService(double probabilityOfOccurrence, double fixcosts, double varCosts, TimeSpan duration, double price, double mindCapture, double maxCapture, double investmentCosts, double scrap, double mTTF, double downtime, double rework)
         {
             ProbabilityOfOccurrence = probabilityOfOccurrence;
             Fixcosts = fixcosts;

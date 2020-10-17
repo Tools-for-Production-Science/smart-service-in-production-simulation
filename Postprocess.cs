@@ -7,33 +7,37 @@ namespace ProduktionssystemSimulation
     class Postprocess
     {
         Simulation Env;
-        TimeSpan RepairTime;
-        double DowntimePreMean;
-        double DowntimePreSigma;
+        double DowntimePostMean;
+        double DowntimePostSigma;
+        TimeSpan ProductionTime;
+        TimeSpan Downtime;
 
-        public Postprocess(Simulation env, double downtimepremean, double downtimepresigma)
+        public Postprocess(Simulation env, double downtimepostmean, double downtimepostsigma)
         {
             Env = env;
-            DowntimePreMean = downtimepremean;
-            DowntimePreSigma = downtimepresigma;
+            DowntimePostMean = downtimepostmean;
+            DowntimePostSigma = downtimepostsigma;
         }
 
-        public IEnumerable<Event> ProductionStep(Simulation env, Resource machine, Request req, Product product)
+        public IEnumerable<Event> ProductionStep(Resource machine, Request req, Product product, Analysis analysis)
         {
-            env.Log("{0} ProductNo {1}: Machine Postprocess is in production", env.Now, product.ID);
-
-            yield return env.TimeoutNormalPositive(product.ProductionTimePostMean, product.ProductionTimePostSigma);
-            if (env.ActiveProcess.HandleFault())
+            Env.Log("{0} ProductNo {1}: Machine Postprocess is in production", Env.Now, product.ID);
+            ProductionTime = Env.RandNormalPositive(product.ProductionTimePostMean, product.ProductionTimePostSigma);
+            analysis.APTPost += ProductionTime;
+            yield return Env.Timeout(ProductionTime);
+            if (Env.ActiveProcess.HandleFault())
             {
                 ProcessControl.BrokenPost = true;
-                env.Log("Break Machine Postprocess");
+                Env.Log("Break Machine Postprocess");
                 // Ausfalldauer für M
-                yield return env.Timeout(TimeSpan.FromDays(env.RandNormalPositive(DowntimePreMean, DowntimePreSigma)));
-                env.Log("Machine in Postprocess repaired");
+                Downtime = Env.RandLogNormal2(TimeSpan.FromDays(DowntimePostMean), TimeSpan.FromDays(DowntimePostSigma));
+                analysis.ADOTPost += Downtime;
+                yield return Env.Timeout(Downtime);
+                Env.Log("Machine in Postprocess repaired");
                 ProcessControl.BrokenPost = false;
             }
             machine.Release(req);
-            env.Log("{0} ProductNo {1}: Machine Postprocess is finished", env.Now, product.ID);
+            Env.Log("{0} ProductNo {1}: Machine Postprocess is finished", Env.Now, product.ID);
         }
 
        

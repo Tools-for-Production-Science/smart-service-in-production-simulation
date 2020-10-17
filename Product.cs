@@ -16,6 +16,8 @@ namespace ProduktionssystemSimulation
         private TimeSpan _ProductionTimePreSigma;
         private TimeSpan _ProductionTimeMainSigma;
         private TimeSpan _ProductionTimePostSigma;
+        private TimeSpan _TotalReworkTime;
+
         public Product(int id, TimeSpan productiontimepremean, TimeSpan productiontimemainmean, TimeSpan productiontimepostmean, TimeSpan productionTimePreSigma, TimeSpan productionTimeMainSigma, TimeSpan productionTimePostSigma, TimeSpan reworkTimeMean, TimeSpan reworkTimeSigma)
         {
             ID = id;
@@ -27,6 +29,7 @@ namespace ProduktionssystemSimulation
             ProductionTimePreSigma = productionTimePreSigma;
             ProductionTimeMainSigma = productionTimeMainSigma;
             ProductionTimePostSigma = productionTimePostSigma;
+            TotalReworkTime = TimeSpan.FromDays(0);
         }
 
         public int ID { get => _ID; set => _ID = value; }
@@ -39,5 +42,6 @@ namespace ProduktionssystemSimulation
         public TimeSpan ProductionTimePreSigma { get => _ProductionTimePreSigma; set => _ProductionTimePreSigma = value; }
         public TimeSpan ProductionTimeMainSigma { get => _ProductionTimeMainSigma; set => _ProductionTimeMainSigma = value; }  
         public TimeSpan ProductionTimePostSigma { get => _ProductionTimePostSigma; set => _ProductionTimePostSigma = value; }
+        public TimeSpan TotalReworkTime { get => _TotalReworkTime; set => _TotalReworkTime = value; }
     }
 }
