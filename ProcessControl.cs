@@ -7,39 +7,39 @@ using System.IO;
 
 namespace ProduktionssystemSimulation
 {
-    class ProcessControl 
+    public class ProcessControl 
     {
-        private static Simulation Env;
-        private static List<Job> Jobs;
-        private static SmartService SmartService;
-        private static Preprocess Preprocess;
-        private static Mainprocess Mainprocess;
-        private static Postprocess Postprocess;
+        private Simulation Env;
+        private List<Job> Jobs;
+        private SmartService SmartService;
+        private Preprocess Preprocess;
+        private Mainprocess Mainprocess;
+        private Postprocess Postprocess;
         private Process ProcessPre;
         private Process ProcessMain;
         private Process ProcessPost;
-        public static int ReworkQuantity = 0;
-        public static int ReproductionQuantity = 0;
+        public int ReworkQuantity = 0;
+        public int ReproductionQuantity = 0;
         public TimeSpan MtbfPre;
         public TimeSpan MtbfMain;
         public TimeSpan MtbfPost;
-        public static Boolean BrokenPre = false;
-        public static Boolean BrokenMain = false;
-        public static Boolean BrokenPost = false;
+        public Boolean BrokenPre = false;
+        public Boolean BrokenMain = false;
+        public Boolean BrokenPost = false;
         int ProducedQuanity = 0;
         Store ProducedProducts;
         Store ProductsToProduce;
         static Dictionary<string, double> InputData = new Dictionary<string, double>();
-        private static ArrayList FinishedJobs = new ArrayList();
+        private ArrayList FinishedJobs = new ArrayList();
         private Analysis analysis; 
 
         public ProcessControl(List<Job> jobs, SmartService smartService, Dictionary<string, double> inputData, Simulation env)
         {
             Jobs = jobs;
             SmartService = smartService;
-            Preprocess = new Preprocess(env, inputData["DowntimePreMean"], inputData["DowntimePreSigma"]);
-            Mainprocess = new Mainprocess(env, smartService, inputData["DowntimeMainMean"], inputData["DowntimeMainSigma"]);
-            Postprocess = new Postprocess(env, inputData["DowntimePostMean"], inputData["DowntimePostSigma"]);
+            Preprocess = new Preprocess(this, env, inputData["DowntimePreMean"], inputData["DowntimePreSigma"]);
+            Mainprocess = new Mainprocess(this, env, smartService, inputData["DowntimeMainMean"], inputData["DowntimeMainSigma"]);
+            Postprocess = new Postprocess(this, env, inputData["DowntimePostMean"], inputData["DowntimePostSigma"]);
             MtbfPre = TimeSpan.FromDays(inputData["MTTFPre"]);
             MtbfMain = TimeSpan.FromDays(inputData["MTTFMain"] * (1 + inputData["MTTF"]));
             MtbfPost = TimeSpan.FromDays(inputData["MTTFPost"]);
@@ -99,7 +99,7 @@ namespace ProduktionssystemSimulation
             env.Log("{0} ProductNo {1}: Here I am", arrive, product.ID);
             var reqPre = mPre.Request();
             yield return reqPre;
-            yield return ProcessPre = env.Process(Preprocess.ProductionStep( mPre, reqPre, product, analysis));
+            yield return ProcessPre = env.Process(Preprocess.ProductionStep(mPre, reqPre, product, analysis));
             yield return env.Process(ReviewRework.ReviewPre(env, position, product, analysis));
             if (product.Broken)
             {

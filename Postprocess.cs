@@ -6,14 +6,16 @@ namespace ProduktionssystemSimulation
 {
     class Postprocess
     {
+        ProcessControl pc;
         Simulation Env;
         double DowntimePostMean;
         double DowntimePostSigma;
         TimeSpan ProductionTime;
         TimeSpan Downtime;
 
-        public Postprocess(Simulation env, double downtimepostmean, double downtimepostsigma)
+        public Postprocess(ProcessControl pc, Simulation env, double downtimepostmean, double downtimepostsigma)
         {
+            this.pc = pc;
             Env = env;
             DowntimePostMean = downtimepostmean;
             DowntimePostSigma = downtimepostsigma;
@@ -27,14 +29,14 @@ namespace ProduktionssystemSimulation
             yield return Env.Timeout(ProductionTime);
             if (Env.ActiveProcess.HandleFault())
             {
-                ProcessControl.BrokenPost = true;
+                pc.BrokenPost = true;
                 Env.Log("Break Machine Postprocess");
                 // Ausfalldauer für M
                 Downtime = Env.RandLogNormal2(TimeSpan.FromDays(DowntimePostMean), TimeSpan.FromDays(DowntimePostSigma));
                 analysis.ADOTPost = analysis.ADOTPost.Add(Downtime);
                 yield return Env.Timeout(Downtime);
                 Env.Log("Machine in Postprocess repaired");
-                ProcessControl.BrokenPost = false;
+                pc.BrokenPost = false;
             }
             machine.Release(req);
             Env.Log("{0} ProductNo {1}: Machine Postprocess is finished", Env.Now, product.ID);

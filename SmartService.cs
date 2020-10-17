@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ProduktionssystemSimulation
 {
-    class SmartService
+    public class SmartService
     {
         private static double _probabilityOfOccurrence;
         private static double _investmentCosts;
