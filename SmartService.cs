@@ -1,28 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ProduktionssystemSimulation
+﻿namespace ProduktionssystemSimulation
 {
     public class SmartService
     {
-        private static double _downtime = 0;
-        private static double _mttf = 0;
-        private static double _scrap = 0;
-        private static double _rework= 0;
+        private double _DowntimeMean = 0;
+        private double _MTBFMean = 0;
+        private double _Scrap = 0;
+        private double _Rework= 0;
+        private double _DowntimeSigma = 0;
 
-
-        public double Downtime { get => _downtime; set => _downtime = value; }
-        public double Scrap { get => _scrap; set => _scrap = value; }
-        public double MTTF { get => _mttf; set => _mttf = value; }
-        public double Rework { get => _rework; set => _rework = value; }
-
-        public SmartService( double scrap, double mTTF, double downtime, double rework)
+        public SmartService(double scrap, double mTBFMean, double downtimeMean, double downtimeSigma, double rework)
         {
             Scrap = scrap;
-            MTTF = mTTF;
-            Downtime = downtime;
+            MTBFMean = mTBFMean;
+            DowntimeMean = downtimeMean;
             Rework = rework;
+            DowntimeSigma = downtimeSigma;
         }
+        
+        public double DowntimeMean { get => _DowntimeMean; set => _DowntimeMean = value; }
+        public double Scrap { get => _Scrap; set => _Scrap = value; }
+        public double MTBFMean { get => _MTBFMean; set => _MTBFMean = value; }
+        public double Rework { get => _Rework; set => _Rework = value; }
+        public double DowntimeSigma { get => _DowntimeSigma; set => _DowntimeSigma = value; }
     }
 }

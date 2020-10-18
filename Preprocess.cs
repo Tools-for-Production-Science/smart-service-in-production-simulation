@@ -12,21 +12,23 @@ namespace ProduktionssystemSimulation
         double DowntimePreSigma;
         TimeSpan ProductionTime;
         TimeSpan Downtime;
+        Analysis analysis;
        
-        public Preprocess(ProcessControl pc, Simulation env, double downtimepremean, double downtimepresigma)
+        public Preprocess(ProcessControl pc, Simulation env, double downtimepremean, double downtimepresigma, Analysis analysis)
         {
             this.pc = pc;
             Env = env;
+            this.analysis = analysis;
             // fix
             // hier noch Parameter die eingelesen werden übergeben und setzten
             DowntimePreMean = downtimepremean;
             DowntimePreSigma = downtimepresigma;
         }
 
-        public IEnumerable<Event> ProductionStep(Resource machine, Request req, Product product, Analysis analysis)
+        public IEnumerable<Event> ProductionStep(Resource machine, Request req, Product product)
         {
             //Env.Log("{0} ProductNo {1}: Machine Preprocess is in production", Env.Now, product.ID);
-            ProductionTime = Env.RandNormalPositive(product.ProductionTimePreMean, product.ProductionTimePreSigma);
+            ProductionTime = Env.RandLogNormal2(product.ProductionTimePreMean, product.ProductionTimePreSigma);
             analysis.APTPre = analysis.APTPre.Add(ProductionTime);
             yield return Env.Timeout(ProductionTime);
             if (Env.ActiveProcess.HandleFault())
@@ -35,6 +37,7 @@ namespace ProduktionssystemSimulation
                 //Env.Log("Break Machine in Preprocess");
                 // Ausfalldauer für M
                 Downtime = Env.RandLogNormal2(TimeSpan.FromDays(DowntimePreMean), TimeSpan.FromDays(DowntimePreSigma));
+                Console.WriteLine("PRE: "+Downtime.TotalHours);
                 analysis.ADOTPre = analysis.ADOTPre.Add(Downtime);
                 product.Broken = true;
                 yield return Env.Timeout(Downtime);

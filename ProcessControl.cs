@@ -37,12 +37,13 @@ namespace ProduktionssystemSimulation
         {
             Jobs = jobs;
             SmartService = smartService;
-            Preprocess = new Preprocess(this, env, inputData["DowntimePreMean"], inputData["DowntimePreSigma"]);
-            Mainprocess = new Mainprocess(this, env, smartService, inputData["DowntimeMainMean"], inputData["DowntimeMainSigma"]);
-            Postprocess = new Postprocess(this, env, inputData["DowntimePostMean"], inputData["DowntimePostSigma"]);
-            MtbfPre = TimeSpan.FromDays(inputData["MTTFPre"]);
-            MtbfMain = TimeSpan.FromDays(inputData["MTTFMain"] * (1 + smartService.MTTF));
-            MtbfPost = TimeSpan.FromDays(inputData["MTTFPost"]);
+            analysis = new Analysis(inputData);
+            Preprocess = new Preprocess(this, env, inputData["DowntimePreMean"], inputData["DowntimePreSigma"], analysis);
+            Mainprocess = new Mainprocess(this, env, smartService, inputData["DowntimeMainMean"], inputData["DowntimeMainSigma"], analysis);
+            Postprocess = new Postprocess(this, env, inputData["DowntimePostMean"], inputData["DowntimePostSigma"], analysis);
+            MtbfPre = TimeSpan.FromDays(inputData["MTBFPre"]);
+            MtbfMain = TimeSpan.FromDays(inputData["MTBFMain"] * (1 + smartService.MTBFMean));
+            MtbfPost = TimeSpan.FromDays(inputData["MTBFPost"]);
             InputData = inputData;
             Env = env;
         }
@@ -108,7 +109,7 @@ namespace ProduktionssystemSimulation
             //env.Log("{0} ProductNo {1}: Here I am", arrive, product.ID);
             var reqPre = mPre.Request();
             yield return reqPre;
-            yield return ProcessPre = env.Process(Preprocess.ProductionStep(mPre, reqPre, product, analysis));
+            yield return ProcessPre = env.Process(Preprocess.ProductionStep(mPre, reqPre, product));
             if (!product.Broken) { yield return env.Process(ReviewRework.ReviewPre(env, position, product, analysis));}
             if (product.Broken)
             {
@@ -121,7 +122,7 @@ namespace ProduktionssystemSimulation
             {
                 var reqMain = mMain.Request();
                 yield return reqMain;
-                yield return ProcessMain = env.Process(Mainprocess.ProductionStep( mMain, reqMain, product, analysis));
+                yield return ProcessMain = env.Process(Mainprocess.ProductionStep( mMain, reqMain, product));
                 if (!product.Broken)
                 {
                     yield return env.Process(ReviewRework.ReviewMain(env, position, product, SmartService, analysis));
@@ -137,7 +138,7 @@ namespace ProduktionssystemSimulation
                 {
                     var reqPost = mPost.Request();
                     yield return reqPost;
-                    yield return ProcessPost = env.Process(Postprocess.ProductionStep( mPost, reqPost, product, analysis));
+                    yield return ProcessPost = env.Process(Postprocess.ProductionStep( mPost, reqPost, product));
                     if (!product.Broken)
                     {
                         yield return env.Process(ReviewRework.ReviewPost(env, position, product, analysis));
@@ -166,7 +167,7 @@ namespace ProduktionssystemSimulation
                 // Ausfallwahrscheinlichkeit für M
                 TimeSpan failure = env.RandExponential(MtbfPost);
                 //env.Log("{0}", failure);
-                analysis.ADOTPre = analysis.ADOTPre.Add(failure);
+                //analysis.ADOTPre = analysis.ADOTPre.Add(failure);
                 yield return env.Timeout(failure);
                 if (ProcessPre != null && !BrokenPre && ProcessPre.IsOk && ProcessPre.IsAlive)
                 {
@@ -183,7 +184,7 @@ namespace ProduktionssystemSimulation
             {
                 TimeSpan failure = env.RandExponential(MtbfPost);
                 //env.Log("{0}", failure);
-                analysis.ADOTMain = analysis.ADOTMain.Add(failure);
+                //analysis.ADOTMain = analysis.ADOTMain.Add(failure);
                 yield return env.Timeout(failure);
                 if (ProcessMain != null && !BrokenMain && ProcessMain.IsOk && ProcessMain.IsAlive)
                 {
@@ -200,7 +201,7 @@ namespace ProduktionssystemSimulation
                 // Ausfallwahrscheinlichkeit für M
                 TimeSpan failure = env.RandExponential(MtbfPost);
                 //env.Log("{0}",failure);
-                analysis.ADOTPost = analysis.ADOTPost.Add(failure);
+                //analysis.ADOTPost = analysis.ADOTPost.Add(failure);
                 yield return env.Timeout(failure);
                 if (ProcessPost != null && !BrokenPost && ProcessPost.IsOk && ProcessPost.IsAlive)
                 {
@@ -233,7 +234,7 @@ namespace ProduktionssystemSimulation
                 WaitingTime = new SampleMonitor(name: "M3 Waiting time", collect: true),
                 QueueLength = new TimeSeriesMonitor(Env, name: "M3 Queue Length", collect: true),
             };
-            analysis = new Analysis(InputData);
+            
             Env.Process(JobInProcess(Env, MPreprocess, MMainprocess, MPostprocess, Jobs));
             if (MtbfPre != TimeSpan.FromDays(0))
             {

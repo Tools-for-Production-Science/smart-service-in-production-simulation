@@ -7,9 +7,9 @@ namespace ProduktionssystemSimulation
 {
     public class Analysis
     {
-        private TimeSpan _AUSTPre;
-        private TimeSpan _AUSTMain;
-        private TimeSpan _AUSTPost;
+        private TimeSpan _AUSTPre = TimeSpan.FromDays(0);
+        private TimeSpan _AUSTMain = TimeSpan.FromDays(0);
+        private TimeSpan _AUSTPost = TimeSpan.FromDays(0);
         private double _QuantityOfReworkPre;
         private double _QuantityOfScrapPre;
         private double _QuantityOfReworkMain;

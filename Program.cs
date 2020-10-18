@@ -29,7 +29,7 @@ namespace ProduktionssystemSimulation
             //Console.SetError(TextWriter.Null);
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
-            string curFile = @"F:\data.txt";
+            string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data.txt";
             if (File.Exists(curFile))
             {
                 Console.WriteLine("File exists.");
@@ -48,48 +48,58 @@ namespace ProduktionssystemSimulation
                 }
             }
            
-            StreamWriter jobsCSV = new StreamWriter("Jobs.txt");
+            //StreamWriter jobsCSV = new StreamWriter("Jobs.txt");
             //foreach(Job i in Jobs)
             //{
             //    jobsCSV.WriteLine(i.ToString() + "\n");
             //}
             SmartService = new SmartService(
                 inputData["Scrap"],
-                inputData["MTTF"],
-                inputData["Downtime"],
+                inputData["MTBFMean"],
+                inputData["DowntimeMean"],
+                inputData["DowntimeSigma"],
                 inputData["Rework"]
             );
             // mit SS
             int seed = 0;
             StreamWriter swKPISS = new StreamWriter("KPISS.csv");
-            StreamWriter swGSS = new StreamWriter("GewinnSS.csv");
+
             //List<Job> Jobs = Jobgenerator();
             //Console.WriteLine("Jobs1 == Jobs2: " + EqualityComparer<List<Job>>.Default.Equals(Jobs1, Jobs1));
             List<List<Job>> JobsListe = new List<List<Job>>();
-            for(int i = 0; i< inputData["Rounds"]; i++)
-            {
-                JobsListe.Add(Jobgenerator());
-            }
+            //for(int i = 0; i< inputData["Rounds"]; i++)
+            //{
+            //    JobsListe.Add(Jobgenerator());
+            //}
+            swKPISS.Write("AvailabilityPre;AvailabilityMain;AvailabilityPost;EffectivenessPre;EffectivenessMain;EffectivenessPost;ThrouputratePre;ThrouputrateMain;ThrouputratePost;ScrapRatioPre;ScrapRatioMain;ScrapRatioPost;ReworkRatioPre;ReworkRatioMain;ReworkRatioPost;NAMain;NAPost;NAPre;QBRPre;QBRMain;QBRPost;MTBFPre;MTTRPre;MTBFMain;MTTRMain;MTBFPost;MTTRPost;OEEPre;OEEMain;OEEPost;Gewinn\n");
+
             while (i < inputData["Rounds"])
             {
                 //randomSeed: 42
-                ProcessControl pc = new ProcessControl(CopyJobs(JobsListe.ElementAt(i)), SmartService, inputData, new Simulation(randomSeed: seed));
+                ProcessControl pc = new ProcessControl(Jobgenerator(), SmartService, inputData, new Simulation(randomSeed: seed));
                 var tupelKPIProfit = pc.Simulate();
                 GewinnSS.Add(tupelKPIProfit.Item2);
-                swGSS.WriteLine(tupelKPIProfit.Item2);
-                foreach (var i in tupelKPIProfit.Item1)
+                //swGSS.WriteLine(tupelKPIProfit.Item2);
+                foreach (var pair in tupelKPIProfit.Item1)
                 {
-                    swKPISS.WriteLine(i.ToString());
+                    swKPISS.Write("{0};", pair.Value);
+                    if (pair.Key == "OEEPost"){
+                        swKPISS.Write("{0}\n", tupelKPIProfit.Item2);
+                    }
                 }
+                Console.WriteLine(i);
 
                 i++;
                 seed += 33;
             }
-            swGSS.Close();
+
             swKPISS.Close();
+            
             // ohne SS
+            Console.WriteLine("SS ist fertig.");
             i = 0;
             SmartService = new SmartService(
+                0,
                 0,
                 0,
                 0,
@@ -97,29 +107,39 @@ namespace ProduktionssystemSimulation
             );
             seed = 0;
             StreamWriter swKPIOSS = new StreamWriter("KPIOSS.csv");
-            StreamWriter swGOSS = new StreamWriter("GewinnOSS.csv");
+
+            env = new Simulation(randomSeed: 42);
+            swKPIOSS.Write("AvailabilityPre;AvailabilityMain;AvailabilityPost;EffectivenessPre;EffectivenessMain;EffectivenessPost;ThrouputratePre;ThrouputrateMain;ThrouputratePost;ScrapRatioPre;ScrapRatioMain;ScrapRatioPost;ReworkRatioPre;ReworkRatioMain;ReworkRatioPost;NAMain;NAPost;NAPre;QBRPre;QBRMain;QBRPost;MTBFPre;MTTRPre;MTBFMain;MTTRMain;MTBFPost;MTTRPost;OEEPre;OEEMain;OEEPost;Gewinn\n");
 
             while (i < inputData["Rounds"])
             {
                 //randomSeed: 42
-                ProcessControl pc = new ProcessControl(CopyJobs(JobsListe.ElementAt(i)), SmartService, inputData, new Simulation(randomSeed: seed));
+                ProcessControl pc = new ProcessControl(Jobgenerator(), SmartService, inputData, new Simulation(randomSeed: seed));
                 var tupelKPIProfit = pc.Simulate();
                 GewinnOSS.Add(tupelKPIProfit.Item2);
-                swGOSS.WriteLine(tupelKPIProfit.Item2);
-                foreach (var i in tupelKPIProfit.Item1)
+                //swGOSS.WriteLine(tupelKPIProfit.Item2);
+                foreach (var pair in tupelKPIProfit.Item1)
                 {
-                    swKPIOSS.WriteLine(i.ToString());
+                    swKPIOSS.Write("{0};", pair.Value);
+                    if (pair.Key == "OEEPost")
+                    {
+                        swKPIOSS.Write("{0}\n", tupelKPIProfit.Item2);
+                    }
                 }
+
+                Console.WriteLine(i);
+
                 i++;
                 seed += 33;
             }
             swKPIOSS.Close();
-            swGOSS.Close();
+
            
             StreamWriter Vorteil = new StreamWriter("GeldwerterVorteil.csv");
             double averageSS = GewinnSS.Average();
             double averageOSS = GewinnOSS.Average();
             double profit = averageSS - averageOSS;
+            Console.WriteLine(profit);
             Vorteil.WriteLine("Gewinn Average SS: {0}", averageSS);
             Vorteil.WriteLine("Gewinn Average OSS: {0}", averageOSS);
             Vorteil.WriteLine("Geldwerter Vorteil: {0}", profit);
@@ -136,7 +156,7 @@ namespace ProduktionssystemSimulation
         public static List<Job> Jobgenerator()
         {
             List<Job> Jobs = new List<Job>();
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 150; i++)
             {
                 List<Position> Positions = new List<Position>();
                 for (int k = 1; k <= inputData["NumberPosition"]; k++)

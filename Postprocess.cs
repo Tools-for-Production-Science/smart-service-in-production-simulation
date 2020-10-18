@@ -12,19 +12,21 @@ namespace ProduktionssystemSimulation
         double DowntimePostSigma;
         TimeSpan ProductionTime;
         TimeSpan Downtime;
+        Analysis analysis;
 
-        public Postprocess(ProcessControl pc, Simulation env, double downtimepostmean, double downtimepostsigma)
+        public Postprocess(ProcessControl pc, Simulation env, double downtimepostmean, double downtimepostsigma, Analysis analysis)
         {
             this.pc = pc;
+            this.analysis = analysis;
             Env = env;
             DowntimePostMean = downtimepostmean;
             DowntimePostSigma = downtimepostsigma;
         }
 
-        public IEnumerable<Event> ProductionStep(Resource machine, Request req, Product product, Analysis analysis)
+        public IEnumerable<Event> ProductionStep(Resource machine, Request req, Product product)
         {
             //Env.Log("{0} ProductNo {1}: Machine Postprocess is in production", Env.Now, product.ID);
-            ProductionTime = Env.RandNormalPositive(product.ProductionTimePostMean, product.ProductionTimePostSigma);
+            ProductionTime = Env.RandLogNormal2(product.ProductionTimePostMean, product.ProductionTimePostSigma);
             analysis.APTPost = analysis.APTPost.Add(ProductionTime);
             yield return Env.Timeout(ProductionTime);
             if (Env.ActiveProcess.HandleFault())
@@ -33,6 +35,7 @@ namespace ProduktionssystemSimulation
                 //Env.Log("Break Machine Postprocess");
                 // Ausfalldauer für M
                 Downtime = Env.RandLogNormal2(TimeSpan.FromDays(DowntimePostMean), TimeSpan.FromDays(DowntimePostSigma));
+                Console.WriteLine("POST: "+Downtime.TotalHours);
                 analysis.ADOTPost = analysis.ADOTPost.Add(Downtime);
                 product.Broken = true;
                 yield return Env.Timeout(Downtime);
