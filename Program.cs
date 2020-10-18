@@ -12,6 +12,8 @@ namespace ProduktionssystemSimulation
     class Program
     {
         static int  i = 0;
+        static String[] szenario = new String[] { "alle", "Scrap_Rework", "MTBF_Downtime" };
+        static int szenarioID = 2;
         private static List<Double> GewinnSS = new List<Double>();
         private static List<Double> GewinnOSS = new List<Double>();
         //private static List<Position> Positions = new List<Position>();
@@ -29,7 +31,7 @@ namespace ProduktionssystemSimulation
             //Console.SetError(TextWriter.Null);
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
-            string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data.txt";
+            string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data_" + szenario[szenarioID] + ".txt";
             if (File.Exists(curFile))
             {
                 Console.WriteLine("File exists.");
@@ -62,7 +64,7 @@ namespace ProduktionssystemSimulation
             );
             // mit SS
             int seed = 0;
-            StreamWriter swKPISS = new StreamWriter("KPISS.csv");
+            StreamWriter swKPISS = new StreamWriter("KPISS_"+szenario[szenarioID]+".csv");
 
             //List<Job> Jobs = Jobgenerator();
             //Console.WriteLine("Jobs1 == Jobs2: " + EqualityComparer<List<Job>>.Default.Equals(Jobs1, Jobs1));
@@ -106,7 +108,7 @@ namespace ProduktionssystemSimulation
                 0
             );
             seed = 0;
-            StreamWriter swKPIOSS = new StreamWriter("KPIOSS.csv");
+            StreamWriter swKPIOSS = new StreamWriter("KPIOSS" + szenario[szenarioID] + ".csv");
 
             env = new Simulation(randomSeed: 42);
             swKPIOSS.Write("AvailabilityPre;AvailabilityMain;AvailabilityPost;EffectivenessPre;EffectivenessMain;EffectivenessPost;ThrouputratePre;ThrouputrateMain;ThrouputratePost;ScrapRatioPre;ScrapRatioMain;ScrapRatioPost;ReworkRatioPre;ReworkRatioMain;ReworkRatioPost;NAMain;NAPost;NAPre;QBRPre;QBRMain;QBRPost;MTBFPre;MTTRPre;MTBFMain;MTTRMain;MTBFPost;MTTRPost;OEEPre;OEEMain;OEEPost;Gewinn\n");
@@ -135,7 +137,7 @@ namespace ProduktionssystemSimulation
             swKPIOSS.Close();
 
            
-            StreamWriter Vorteil = new StreamWriter("GeldwerterVorteil.csv");
+            StreamWriter Vorteil = new StreamWriter("GeldwerterVorteil" + szenario[szenarioID] + ".csv");
             double averageSS = GewinnSS.Average();
             double averageOSS = GewinnOSS.Average();
             double profit = averageSS - averageOSS;

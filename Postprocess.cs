@@ -35,7 +35,7 @@ namespace ProduktionssystemSimulation
                 //Env.Log("Break Machine Postprocess");
                 // Ausfalldauer für M
                 Downtime = Env.RandLogNormal2(TimeSpan.FromDays(DowntimePostMean), TimeSpan.FromDays(DowntimePostSigma));
-                Console.WriteLine("POST: "+Downtime.TotalHours);
+                //Console.WriteLine("POST: "+Downtime.TotalHours);
                 analysis.ADOTPost = analysis.ADOTPost.Add(Downtime);
                 product.Broken = true;
                 yield return Env.Timeout(Downtime);

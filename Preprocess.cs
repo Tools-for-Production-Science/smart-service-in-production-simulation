@@ -37,7 +37,7 @@ namespace ProduktionssystemSimulation
                 //Env.Log("Break Machine in Preprocess");
                 // Ausfalldauer für M
                 Downtime = Env.RandLogNormal2(TimeSpan.FromDays(DowntimePreMean), TimeSpan.FromDays(DowntimePreSigma));
-                Console.WriteLine("PRE: "+Downtime.TotalHours);
+                //Console.WriteLine("PRE: "+Downtime.TotalHours);
                 analysis.ADOTPre = analysis.ADOTPre.Add(Downtime);
                 product.Broken = true;
                 yield return Env.Timeout(Downtime);
