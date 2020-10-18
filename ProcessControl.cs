@@ -52,7 +52,7 @@ namespace ProduktionssystemSimulation
             foreach (Job job in jobs)
             {
                 //env.Log("----------------------  START NEW JOB  ----------------------");
-                env.Log("JOB ID: {0}", job.ID);
+                //env.Log("JOB ID: {0}", job.ID);
                 yield return env.Process(Setup(env, mPre, mMain, mPost, job));
             }
             yield break;
@@ -67,11 +67,17 @@ namespace ProduktionssystemSimulation
                 ProductsToProduce = new Store(env);
                 ProducedQuanity = 0;
                 position.TotalProducedQuantity = 0;
-                Console.WriteLine(job.ID +" " + position.TotalProducedQuantity);
-              
+                //Console.WriteLine(job.ID +" " + position.TotalProducedQuantity);
+
                 //SetUp
                 //env.Log("---- SETUP PRODUCTYPE {0} ----", position.ID);
-                yield return env.TimeoutNormalPositive(position.SetupMean, position.SetupSigma);
+                TimeSpan setupPre = env.RandLogNormal2(position.SetupMean, position.SetupSigma);
+                analysis.AUSTPre = analysis.AUSTPre.Add(setupPre); 
+                TimeSpan setupMain = env.RandLogNormal2(position.SetupMean, position.SetupSigma);
+                analysis.AUSTMain = analysis.AUSTMain.Add(setupMain);
+                TimeSpan setupPost = env.RandLogNormal2(position.SetupMean, position.SetupSigma);
+                analysis.AUSTPost = analysis.AUSTPost.Add(setupPost);
+                yield return env.Timeout(setupPre) & env.Timeout(setupMain) & env.Timeout(setupPost);
                 //env.Log("End of setup");
                 foreach (Product product in position.Products)
                 {
@@ -103,7 +109,7 @@ namespace ProduktionssystemSimulation
             var reqPre = mPre.Request();
             yield return reqPre;
             yield return ProcessPre = env.Process(Preprocess.ProductionStep(mPre, reqPre, product, analysis));
-            yield return env.Process(ReviewRework.ReviewPre(env, position, product, analysis));
+            if (!product.Broken) { yield return env.Process(ReviewRework.ReviewPre(env, position, product, analysis));}
             if (product.Broken)
             {
                 product.Broken = false;
@@ -116,7 +122,10 @@ namespace ProduktionssystemSimulation
                 var reqMain = mMain.Request();
                 yield return reqMain;
                 yield return ProcessMain = env.Process(Mainprocess.ProductionStep( mMain, reqMain, product, analysis));
-                yield return env.Process(ReviewRework.ReviewMain(env, position, product, SmartService, analysis));
+                if (!product.Broken)
+                {
+                    yield return env.Process(ReviewRework.ReviewMain(env, position, product, SmartService, analysis));
+                }
                 if (product.Broken)
                 {
                     product.Broken = false;
@@ -129,7 +138,10 @@ namespace ProduktionssystemSimulation
                     var reqPost = mPost.Request();
                     yield return reqPost;
                     yield return ProcessPost = env.Process(Postprocess.ProductionStep( mPost, reqPost, product, analysis));
-                    yield return env.Process(ReviewRework.ReviewPost(env, position, product, analysis));
+                    if (!product.Broken)
+                    {
+                        yield return env.Process(ReviewRework.ReviewPost(env, position, product, analysis));
+                    }
                     if (product.Broken)
                     {
                         product.Broken = false;
@@ -257,7 +269,7 @@ namespace ProduktionssystemSimulation
             //  .Build();
             //report.WriteHeader();
             analysis.FinishedJobs = FinishedJobs;
-            Console.WriteLine("Fineshjobs Count: {0}", FinishedJobs.Count);
+            //Console.WriteLine("Fineshjobs Count: {0}", FinishedJobs.Count);
             return (analysis.CalculateKPIs(), analysis.Profit());
             //FinishedJobs.ToList().ForEach(i => Console.WriteLine(i.ToString()));
         } 

@@ -36,6 +36,7 @@ namespace ProduktionssystemSimulation
                 // Ausfalldauer für M
                 Downtime = TimeSpan.FromDays(Env.RandLogNormal2(DowntimeMainMean,DowntimeMainSigma) * (1  - SmartService.Downtime));
                 analysis.ADOTMain = analysis.ADOTMain.Add(Downtime);
+                product.Broken = true;
                 yield return Env.Timeout(Downtime);
                 //Env.Log("Machine in Mainprocess repaired");
                 pc.BrokenMain = false;

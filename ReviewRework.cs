@@ -39,7 +39,7 @@ namespace ProduktionssystemSimulation
 
             if (0 <= reviewRatio && reviewRatio <= (1 - ((position.ScrapMainMean * (1 - smartService.Scrap))+ (position.ReworkMainMean * (1 - smartService.Rework)))))
             {
-                analysis.QuantityOfReworkMain = analysis.QuantityOfReworkMain +1;
+                analysis.QuantityOfGoodMain = analysis.QuantityOfGoodMain +1;
                 //env.Log("End of review. Product {0} corresponds to the quality", position.ID);
             }
             else if ((1 - ((position.ScrapMainMean * (1 + smartService.Scrap)) + (position.ReworkMainMean * (1 - smartService.Rework)))) < reviewRatio && reviewRatio < (1 - (position.ScrapMainMean * (1 - smartService.Scrap))))
@@ -76,7 +76,7 @@ namespace ProduktionssystemSimulation
             else
             {
                 //env.Log("Scrap: Product {0}", position.ID);
-                analysis.QuantityOfScrapPre = analysis.QuantityOfScrapPre +1;
+                analysis.QuantityOfScrapPost = analysis.QuantityOfScrapPost +1;
                 product.Broken = true;
             }
         }

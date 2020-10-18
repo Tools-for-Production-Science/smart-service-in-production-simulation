@@ -36,6 +36,7 @@ namespace ProduktionssystemSimulation
                 // Ausfalldauer für M
                 Downtime = Env.RandLogNormal2(TimeSpan.FromDays(DowntimePreMean), TimeSpan.FromDays(DowntimePreSigma));
                 analysis.ADOTPre = analysis.ADOTPre.Add(Downtime);
+                product.Broken = true;
                 yield return Env.Timeout(Downtime);
                 //Env.Log("Machine in Preprocess repaired");
                 pc.BrokenPre = false;

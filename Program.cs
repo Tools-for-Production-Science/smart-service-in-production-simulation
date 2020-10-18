@@ -63,12 +63,17 @@ namespace ProduktionssystemSimulation
             int seed = 0;
             StreamWriter swKPISS = new StreamWriter("KPISS.csv");
             StreamWriter swGSS = new StreamWriter("GewinnSS.csv");
-            List<Job> Jobs = Jobgenerator();
+            //List<Job> Jobs = Jobgenerator();
             //Console.WriteLine("Jobs1 == Jobs2: " + EqualityComparer<List<Job>>.Default.Equals(Jobs1, Jobs1));
+            List<List<Job>> JobsListe = new List<List<Job>>();
+            for(int i = 0; i< inputData["Rounds"]; i++)
+            {
+                JobsListe.Add(Jobgenerator());
+            }
             while (i < inputData["Rounds"])
             {
                 //randomSeed: 42
-                ProcessControl pc = new ProcessControl(CopyJobs(Jobs), SmartService, inputData, new Simulation(randomSeed: seed));
+                ProcessControl pc = new ProcessControl(CopyJobs(JobsListe.ElementAt(i)), SmartService, inputData, new Simulation(randomSeed: seed));
                 var tupelKPIProfit = pc.Simulate();
                 GewinnSS.Add(tupelKPIProfit.Item2);
                 swGSS.WriteLine(tupelKPIProfit.Item2);
@@ -97,7 +102,7 @@ namespace ProduktionssystemSimulation
             while (i < inputData["Rounds"])
             {
                 //randomSeed: 42
-                ProcessControl pc = new ProcessControl(CopyJobs(Jobs), SmartService, inputData, new Simulation(randomSeed: seed));
+                ProcessControl pc = new ProcessControl(CopyJobs(JobsListe.ElementAt(i)), SmartService, inputData, new Simulation(randomSeed: seed));
                 var tupelKPIProfit = pc.Simulate();
                 GewinnOSS.Add(tupelKPIProfit.Item2);
                 swGOSS.WriteLine(tupelKPIProfit.Item2);
