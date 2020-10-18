@@ -43,5 +43,11 @@ namespace ProduktionssystemSimulation
         public TimeSpan ProductionTimeMainSigma { get => _ProductionTimeMainSigma; set => _ProductionTimeMainSigma = value; }  
         public TimeSpan ProductionTimePostSigma { get => _ProductionTimePostSigma; set => _ProductionTimePostSigma = value; }
         public TimeSpan TotalReworkTime { get => _TotalReworkTime; set => _TotalReworkTime = value; }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Product product &&
+                   _ID == product._ID;
+        }
     }
 }

@@ -16,6 +16,24 @@ namespace ProduktionssystemSimulation
             ID = id;
             Positions = positions;
         }
+        public override string ToString()
+        {
+            String s = "ID: " + ID + "\nPriority: " + Priority + "\n";
+            foreach(Position p in Positions)
+            {
+                s = s + p.ToString() + "\n";
+            }
+
+            return s;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Job job &&
+                   _Priority == job._Priority &&
+                   _ID == job._ID &&
+                   EqualityComparer<List<Position>>.Default.Equals(_Positions, job._Positions);
+        }
 
         public int Priority { get => _Priority; set => _Priority = value; }
         public int ID { get => _ID; set => _ID = value; }

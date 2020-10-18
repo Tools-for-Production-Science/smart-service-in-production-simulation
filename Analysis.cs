@@ -10,7 +10,6 @@ namespace ProduktionssystemSimulation
         private TimeSpan _AUSTPre;
         private TimeSpan _AUSTMain;
         private TimeSpan _AUSTPost;
-        private TimeSpan _JobExecutionTime;
         private int _QuantityOfReworkPre;
         private int _QuantityOfScrapPre;
         private int _QuantityOfReworkMain;
@@ -116,12 +115,14 @@ namespace ProduktionssystemSimulation
 
         public double Profit()
         {
-            
             ManufactoringCosts = (InputData["WorkingHours"]-((ADOTPre.TotalMinutes+ ADOTMain.TotalMinutes+ ADOTPost.TotalMinutes) /60))*InputData["MachineHourCosts"]; 
             foreach (Job j in FinishedJobs)
             {
                 foreach (Position p in j.Positions)
                 {
+                    Console.WriteLine("Menge: " +p.Quantity);
+                    Console.WriteLine("Totale Menge: " + p.TotalProducedQuantity);
+                    //Console.WriteLine("Materialkosten pro Stück: " +  p.MaterialCost);
                     Revenue += (p.Quantity * p.Price);
                     MaterialCosts += (p.TotalProducedQuantity * p.MaterialCost);
                     foreach (Product pr in p.Products)
@@ -132,6 +133,12 @@ namespace ProduktionssystemSimulation
             }
             RepairCosts = ((ADOTPre.Add(ADOTMain).Add(ADOTPost)).TotalMinutes / 60) * InputData["HourlyWageFitter"];
             Costs = ManufactoringCosts + MaterialCosts + LabourCosts + RepairCosts;
+            Console.WriteLine("Umsatz: " + Revenue);
+            Console.WriteLine("Kosten: " + Costs);
+            Console.WriteLine("ManufactoringCosts: " + ManufactoringCosts);
+            Console.WriteLine("MaterialCosts: " + MaterialCosts);
+            Console.WriteLine("RepairCosts: " + RepairCosts);
+            Console.WriteLine("LabourCosts: " + LabourCosts);
             return Revenue-Costs;
         }
     }

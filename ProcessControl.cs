@@ -29,7 +29,7 @@ namespace ProduktionssystemSimulation
         int ProducedQuanity = 0;
         Store ProducedProducts;
         Store ProductsToProduce;
-        static Dictionary<string, double> InputData = new Dictionary<string, double>();
+        Dictionary<string, double> InputData = new Dictionary<string, double>();
         private ArrayList FinishedJobs = new ArrayList();
         private Analysis analysis; 
 
@@ -51,7 +51,7 @@ namespace ProduktionssystemSimulation
         {
             foreach (Job job in jobs)
             {
-                env.Log("----------------------  START NEW JOB  ----------------------");
+                //env.Log("----------------------  START NEW JOB  ----------------------");
                 env.Log("JOB ID: {0}", job.ID);
                 yield return env.Process(Setup(env, mPre, mMain, mPost, job));
             }
@@ -66,11 +66,13 @@ namespace ProduktionssystemSimulation
                 ProducedProducts = new Store(env, (int)position.Quantity);
                 ProductsToProduce = new Store(env);
                 ProducedQuanity = 0;
-               
+                position.TotalProducedQuantity = 0;
+                Console.WriteLine(job.ID +" " + position.TotalProducedQuantity);
+              
                 //SetUp
-                env.Log("---- SETUP PRODUCTYPE {0} ----", position.ID);
+                //env.Log("---- SETUP PRODUCTYPE {0} ----", position.ID);
                 yield return env.TimeoutNormalPositive(position.SetupMean, position.SetupSigma);
-                env.Log("End of setup");
+                //env.Log("End of setup");
                 foreach (Product product in position.Products)
                 {
                     ProductsToProduce.Put(product);
@@ -86,6 +88,7 @@ namespace ProduktionssystemSimulation
                         break;
                     }
                     Product product = (Product)getPipe.Value;
+                    position.TotalProducedQuantity += 1;
                     env.Process(Production(env, mPre, mMain, mPost, position, product, ProductsToProduce));
                 } 
             }
@@ -96,7 +99,7 @@ namespace ProduktionssystemSimulation
         public IEnumerable<Event> Production(Simulation env, Resource mPre, Resource mMain, Resource mPost, Position position, Product product, Store productsToProduce)
         {
             var arrive = env.Now;
-            env.Log("{0} ProductNo {1}: Here I am", arrive, product.ID);
+            //env.Log("{0} ProductNo {1}: Here I am", arrive, product.ID);
             var reqPre = mPre.Request();
             yield return reqPre;
             yield return ProcessPre = env.Process(Preprocess.ProductionStep(mPre, reqPre, product, analysis));
@@ -104,7 +107,7 @@ namespace ProduktionssystemSimulation
             if (product.Broken)
             {
                 product.Broken = false;
-                env.Log("Start new production of product {0}", product.ID);
+                //env.Log("Start new production of product {0}", product.ID);
                 productsToProduce.Put(product);
                 yield break;
             }
@@ -117,7 +120,7 @@ namespace ProduktionssystemSimulation
                 if (product.Broken)
                 {
                     product.Broken = false;
-                    env.Log("Start new production of product {0}", product.ID);
+                    //env.Log("Start new production of product {0}", product.ID);
                     productsToProduce.Put(product);
                     yield break;
                 }
@@ -130,7 +133,7 @@ namespace ProduktionssystemSimulation
                     if (product.Broken)
                     {
                         product.Broken = false;
-                        env.Log("Start new production of product {0}", product.ID);
+                        //env.Log("Start new production of product {0}", product.ID);
                         productsToProduce.Put(product);
                         yield break;
                     }
@@ -138,7 +141,7 @@ namespace ProduktionssystemSimulation
                     {   
                         ProducedProducts.Put(product);
                         ProducedQuanity++;
-                        Console.WriteLine("Produced quantity: " + ProducedQuanity);
+                        //Console.WriteLine("Produced quantity: " + ProducedQuanity);
                     }
                 }
             }
@@ -150,12 +153,12 @@ namespace ProduktionssystemSimulation
             {
                 // Ausfallwahrscheinlichkeit für M
                 TimeSpan failure = env.RandExponential(MtbfPost);
-                env.Log("{0}", failure);
+                //env.Log("{0}", failure);
                 analysis.ADOTPre = analysis.ADOTPre.Add(failure);
                 yield return env.Timeout(failure);
                 if (ProcessPre != null && !BrokenPre && ProcessPre.IsOk && ProcessPre.IsAlive)
                 {
-                    env.Log("Break Machine Pre");
+                    //env.Log("Break Machine Pre");
                     analysis.NumberOfFailurePre = analysis.NumberOfFailurePre +1;
                     ProcessPre.Interrupt();
                 }
@@ -167,12 +170,12 @@ namespace ProduktionssystemSimulation
             while (true)
             {
                 TimeSpan failure = env.RandExponential(MtbfPost);
-                env.Log("{0}", failure);
+                //env.Log("{0}", failure);
                 analysis.ADOTMain = analysis.ADOTMain.Add(failure);
                 yield return env.Timeout(failure);
                 if (ProcessMain != null && !BrokenMain && ProcessMain.IsOk && ProcessMain.IsAlive)
                 {
-                    env.Log("Break Machine Main");
+                    //env.Log("Break Machine Main");
                     analysis.NumberOfFailureMain = analysis.NumberOfFailureMain+1;
                     ProcessMain.Interrupt();   
                 }
@@ -184,12 +187,12 @@ namespace ProduktionssystemSimulation
             {
                 // Ausfallwahrscheinlichkeit für M
                 TimeSpan failure = env.RandExponential(MtbfPost);
-                env.Log("{0}",failure);
+                //env.Log("{0}",failure);
                 analysis.ADOTPost = analysis.ADOTPost.Add(failure);
                 yield return env.Timeout(failure);
                 if (ProcessPost != null && !BrokenPost && ProcessPost.IsOk && ProcessPost.IsAlive)
                 {
-                    env.Log("Break Machine Post");
+                    //env.Log("Break Machine Post");
                     analysis.NumberOfFailurePost = analysis.NumberOfFailurePost+1;
                     ProcessPost.Interrupt();
                 }
@@ -198,7 +201,7 @@ namespace ProduktionssystemSimulation
 
         public (Dictionary<string, double>,double) Simulate()
         { 
-            Env.Log("======= Production Factory ========");
+            //Env.Log("======= Production Factory ========");
             
             Resource MPreprocess = new Resource(Env, (int) InputData["CapacityPre"])
             {

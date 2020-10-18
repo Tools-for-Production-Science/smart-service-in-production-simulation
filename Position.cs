@@ -18,14 +18,7 @@ namespace ProduktionssystemSimulation
         private double _Price;
         private TimeSpan _SetupMean;
         private TimeSpan _SetupSigma;
-        private double _TotalProductionTime;
         private int _TotalProducedQuantity = 0;
-        private int _NumberScrapPre = 0;
-        private int _NumberReworkPre = 0;
-        private int _NumberScrapMain = 0;
-        private int _NumberReworkMain = 0;
-        private int _NumberScrapPost = 0;
-        private int _NumberReworkPost = 0;
         private int _ID;
 
         public Position(int quanity, int id, List<Product> products, double scrapPreMean, double scrapMainMean, double scrapPostMean, double reworkPreMean, double reworkMainMean, double reworkPostMean, TimeSpan setupMean, TimeSpan setupSigma, double materialCost, double price)
@@ -54,17 +47,24 @@ namespace ProduktionssystemSimulation
         public double ReworkPreMean { get => _ReworkPreMean; set => _ReworkPreMean = value; }
         public double ReworkMainMean { get => _ReworkMainMean; set => _ReworkMainMean = value; }
         public double ReworkPostMean { get => _ReworkPostMean; set => _ReworkPostMean = value; }
-        public int NumberReworkPre { get => _NumberReworkPre; set => _NumberReworkPre = value; }
-        public int NumberScrapPre { get => _NumberScrapPre; set => _NumberScrapPre = value; }
         public TimeSpan SetupMean { get => _SetupMean; set => _SetupMean = value; }
         public TimeSpan SetupSigma { get => _SetupSigma; set => _SetupSigma = value; }
         public double MaterialCost { get => _MaterialCost; set => _MaterialCost = value; }
-        public int NumberScrapMain { get => _NumberScrapMain; set => _NumberScrapMain = value; }
-        public int NumberReworkMain { get => _NumberReworkMain; set => _NumberReworkMain = value; }
-        public int NumberScrapPost { get => _NumberScrapPost; set => _NumberScrapPost = value; }
-        public int NumberReworkPost { get => _NumberReworkPost; set => _NumberReworkPost = value; }
         public double Price { get => _Price; set => _Price = value; }
-        public double TotalProductionTime { get => _TotalProductionTime; set => _TotalProductionTime = value; }
         public int TotalProducedQuantity { get => _TotalProducedQuantity; set => _TotalProducedQuantity = value; }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Position position &&
+                   _Quantity == position._Quantity &&
+                   EqualityComparer<List<Product>>.Default.Equals(_Products, position._Products) &&
+                   _ID == position._ID;
+        }
+
+        public override string ToString()
+        {
+            return "Quantity: " + Quantity;
+        }
+
     }
 }
