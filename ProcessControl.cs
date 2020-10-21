@@ -11,27 +11,25 @@ namespace ProduktionssystemSimulation
     {
         private Simulation Env;
         private List<Job> Jobs;
-        private SmartService SmartService;
         private Preprocess Preprocess;
         private Mainprocess Mainprocess;
         private Postprocess Postprocess;
         private Process ProcessPre;
         private Process ProcessMain;
         private Process ProcessPost;
-        public int ReworkQuantity = 0;
-        public int ReproductionQuantity = 0;
         public TimeSpan MtbfPre;
         public TimeSpan MtbfMain;
         public TimeSpan MtbfPost;
-        public Boolean BrokenPre = false;
-        public Boolean BrokenMain = false;
-        public Boolean BrokenPost = false;
+        public bool BrokenPre = false;
+        public bool BrokenMain = false;
+        public bool BrokenPost = false;
         int ProducedQuanity = 0;
         Store ProducedProducts;
         Store ProductsToProduce;
         Dictionary<string, double> InputData = new Dictionary<string, double>();
         private ArrayList FinishedJobs = new ArrayList();
-        private Analysis analysis; 
+        private Analysis analysis;
+        private SmartService SmartService;
 
         public ProcessControl(List<Job> jobs, SmartService smartService, Dictionary<string, double> inputData, Simulation env)
         {
@@ -62,7 +60,7 @@ namespace ProduktionssystemSimulation
         {
             StoreGet getPipe;
             
-            foreach (Position position in job.Positions)
+            foreach (Producttype position in job.Positions)
             {
                 ProducedProducts = new Store(env, (int)position.Quantity);
                 ProductsToProduce = new Store(env);
@@ -103,11 +101,11 @@ namespace ProduktionssystemSimulation
             yield break;
         }
 
-        public IEnumerable<Event> Production(Simulation env, Resource mPre, Resource mMain, Resource mPost, Position position, Product product, Store productsToProduce)
+        public IEnumerable<Event> Production(Simulation env, Resource mPre, Resource mMain, Resource mPost, Producttype position, Product product, Store productsToProduce)
         {
             var arrive = env.Now;
             //env.Log("{0} ProductNo {1}: Here I am", arrive, product.ID);
-            var reqPre = mPre.Request();
+            Request reqPre = mPre.Request();
             yield return reqPre;
             yield return ProcessPre = env.Process(Preprocess.ProductionStep(mPre, reqPre, product));
             if (!product.Broken) { yield return env.Process(ReviewRework.ReviewPre(env, position, product, analysis));}
@@ -250,7 +248,7 @@ namespace ProduktionssystemSimulation
             }
             
             FinishedJobs.Clear();
-            Env.Run(TimeSpan.FromHours(InputData["WorkingHours"]));
+           
             //Env.Log(MPreprocess.Utilization.Summarize());
             //Env.Log(MPreprocess.WaitingTime.Summarize());
             //Env.Log(MPreprocess.QueueLength.Summarize());
@@ -268,9 +266,9 @@ namespace ProduktionssystemSimulation
             //  .SetSeparator("\t")
             //  .SetPeriodicUpdate(TimeSpan.FromHours(20), withHeaders: false)
             //  .Build();
-            //report.WriteHeader();
+            //report.WriteHeader(); 
+            Env.Run(TimeSpan.FromHours(InputData["WorkingHours"]));
             analysis.FinishedJobs = FinishedJobs;
-            //Console.WriteLine("Fineshjobs Count: {0}", FinishedJobs.Count);
             return (analysis.CalculateKPIs(), analysis.Profit());
             //FinishedJobs.ToList().ForEach(i => Console.WriteLine(i.ToString()));
         } 

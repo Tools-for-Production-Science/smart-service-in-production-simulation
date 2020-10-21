@@ -6,38 +6,21 @@ namespace ProduktionssystemSimulation
 {
     public class Job
     {
-        private int _Priority;
-        private int _ID;
-        private List<Position> _Positions;
+        private int _priority;
+        private int _id;
+        private List<Producttype> _positions;
 
-        public Job(int priority, int id, List<Position> positions)
+        public Job(int priority, int id, List<Producttype> positions)
         {
             Priority = priority;
             ID = id;
             Positions = positions;
         }
-        public override string ToString()
-        {
-            String s = "ID: " + ID + "\nPriority: " + Priority + "\n";
-            foreach(Position p in Positions)
-            {
-                s = s + p.ToString() + "\n";
-            }
 
-            return s;
-        }
 
-        public override bool Equals(object obj)
-        {
-            return obj is Job job &&
-                   _Priority == job._Priority &&
-                   _ID == job._ID &&
-                   EqualityComparer<List<Position>>.Default.Equals(_Positions, job._Positions);
-        }
-
-        public int Priority { get => _Priority; set => _Priority = value; }
-        public int ID { get => _ID; set => _ID = value; }
-        public List<Position> Positions { get => _Positions; set => _Positions = value; }
+        public int Priority { get => _priority; set => _priority = value; }
+        public int ID { get => _id; set => _id = value; }
+        public List<Producttype> Positions { get => _positions; set => _positions = value; }
 
     }
 }

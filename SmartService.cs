@@ -2,11 +2,11 @@
 {
     public class SmartService
     {
-        private double _DowntimeMean = 0;
-        private double _MTBFMean = 0;
-        private double _Scrap = 0;
-        private double _Rework= 0;
-        private double _DowntimeSigma = 0;
+        private double _downtimeMean = 0;
+        private double _mTBFMean = 0;
+        private double _scrap = 0;
+        private double _rework = 0;
+        private double _downtimeSigma = 0;
 
         public SmartService(double scrap, double mTBFMean, double downtimeMean, double downtimeSigma, double rework)
         {
@@ -17,10 +17,10 @@
             DowntimeSigma = downtimeSigma;
         }
         
-        public double DowntimeMean { get => _DowntimeMean; set => _DowntimeMean = value; }
-        public double Scrap { get => _Scrap; set => _Scrap = value; }
-        public double MTBFMean { get => _MTBFMean; set => _MTBFMean = value; }
-        public double Rework { get => _Rework; set => _Rework = value; }
-        public double DowntimeSigma { get => _DowntimeSigma; set => _DowntimeSigma = value; }
+        public double DowntimeMean { get => _downtimeMean; set => _downtimeMean = value; }
+        public double Scrap { get => _scrap; set => _scrap = value; }
+        public double MTBFMean { get => _mTBFMean; set => _mTBFMean = value; }
+        public double Rework { get => _rework; set => _rework = value; }
+        public double DowntimeSigma { get => _downtimeSigma; set => _downtimeSigma = value; }
     }
 }

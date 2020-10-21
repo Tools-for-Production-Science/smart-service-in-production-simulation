@@ -6,42 +6,49 @@ namespace ProduktionssystemSimulation
 {
     class Postprocess
     {
-        ProcessControl pc;
-        Simulation Env;
-        double DowntimePostMean;
-        double DowntimePostSigma;
-        TimeSpan ProductionTime;
-        TimeSpan Downtime;
-        Analysis analysis;
+        readonly ProcessControl pc;
+        readonly Simulation env;
+        readonly Analysis analysis;
+        readonly double downtimePostMean;
+        readonly double downtimePostSigma;
 
-        public Postprocess(ProcessControl pc, Simulation env, double downtimepostmean, double downtimepostsigma, Analysis analysis)
+        public Postprocess(ProcessControl pc, Simulation env, double downtimePostMean, double downtimePostSigma, Analysis analysis)
         {
             this.pc = pc;
             this.analysis = analysis;
-            Env = env;
-            DowntimePostMean = downtimepostmean;
-            DowntimePostSigma = downtimepostsigma;
+            this.env = env;
+            this.downtimePostMean = downtimePostMean;
+            this.downtimePostSigma = downtimePostSigma;
         }
 
         public IEnumerable<Event> ProductionStep(Resource machine, Request req, Product product)
         {
             //Env.Log("{0} ProductNo {1}: Machine Postprocess is in production", Env.Now, product.ID);
-            ProductionTime = Env.RandLogNormal2(product.ProductionTimePostMean, product.ProductionTimePostSigma);
+            TimeSpan ProductionTime = env.RandLogNormal2(product.ProductionTimePostMean, product.ProductionTimePostSigma);
+
+            // Für die KPI berechnung, die gesamt Zeit in der die Maschine läuft abspeichern.
             analysis.APTPost = analysis.APTPost.Add(ProductionTime);
-            yield return Env.Timeout(ProductionTime);
-            if (Env.ActiveProcess.HandleFault())
+
+            yield return env.Timeout(ProductionTime);
+
+            // Wenn ein Prozess unterbrochen wird, muss die Iteratormethode HandleFault () aufrufen, 
+            // bevor weitere Ereignisse ausgegeben werden können.
+            // Diese Methode muss aufgerufen werden, um das IsOk-Flag des Prozesses auf true zurückzusetzen.
+            if (env.ActiveProcess.HandleFault())
             {
                 pc.BrokenPost = true;
                 //Env.Log("Break Machine Postprocess");
-                // Ausfalldauer für M
-                Downtime = Env.RandLogNormal2(TimeSpan.FromDays(DowntimePostMean), TimeSpan.FromDays(DowntimePostSigma));
-                //Console.WriteLine("POST: "+Downtime.TotalHours);
-                analysis.ADOTPost = analysis.ADOTPost.Add(Downtime);
+
+                TimeSpan downtime = env.RandLogNormal2(TimeSpan.FromDays(downtimePostMean), TimeSpan.FromDays(downtimePostSigma));
+
+                // Ausfallzeit der Maschine für die Berechnung der KPI berechnen.
+                analysis.ADOTPost = analysis.ADOTPost.Add(downtime);
                 product.Broken = true;
-                yield return Env.Timeout(Downtime);
+                yield return env.Timeout(downtime);
                 //Env.Log("Machine in Postprocess repaired");
                 pc.BrokenPost = false;
             }
+            // Maschine wieder frei geben, sobald das Produkt fertig produziert ist.
             machine.Release(req);
             //Env.Log("{0} ProductNo {1}: Machine Postprocess is finished", Env.Now, product.ID);
         }

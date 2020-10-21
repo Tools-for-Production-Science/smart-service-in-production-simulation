@@ -150,7 +150,7 @@ namespace ProduktionssystemSimulation
             ManufactoringCosts = (InputData["WorkingHours"]-((ADOTPre.TotalMinutes+ ADOTMain.TotalMinutes+ ADOTPost.TotalMinutes) /60))*InputData["MachineHourCosts"]; 
             foreach (Job j in FinishedJobs)
             {
-                foreach (Position p in j.Positions)
+                foreach (Producttype p in j.Positions)
                 {
                     //Console.WriteLine("Menge: " +p.Quantity);
                     //Console.WriteLine("Totale Menge: " + p.TotalProducedQuantity);

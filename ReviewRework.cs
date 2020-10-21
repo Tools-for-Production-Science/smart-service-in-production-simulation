@@ -7,10 +7,10 @@ namespace ProduktionssystemSimulation
 {
     static class ReviewRework
     {
-        public static IEnumerable<Event> ReviewPre(Simulation env, Position position, Product product, Analysis analysis)
+        public static IEnumerable<Event> ReviewPre(Simulation env, Producttype position, Product product, Analysis analysis)
         {
             //env.Log("Review after Preprocess");
-            
+
             var reviewRatio = env.RandUniform(0, 1);
 
             if (0 <= reviewRatio && reviewRatio <= (1-(position.ScrapPreMean+position.ReworkPreMean)))
@@ -31,7 +31,7 @@ namespace ProduktionssystemSimulation
             }
         }
 
-        public static IEnumerable<Event> ReviewMain(Simulation env, Position position, Product product, SmartService smartService, Analysis analysis)
+        public static IEnumerable<Event> ReviewMain(Simulation env, Producttype position, Product product, SmartService smartService, Analysis analysis)
         {
             //env.Log("Review after Mainprocess");
 
@@ -56,7 +56,7 @@ namespace ProduktionssystemSimulation
             }
         }
 
-        public static IEnumerable<Event> ReviewPost(Simulation env, Position position, Product product, Analysis analysis)
+        public static IEnumerable<Event> ReviewPost(Simulation env, Producttype position, Product product, Analysis analysis)
         {
             //env.Log("Review after Postprocess");
 

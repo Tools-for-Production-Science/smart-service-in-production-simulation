@@ -11,26 +11,24 @@ namespace ProduktionssystemSimulation
 {
     class Program
     {
-        static int  i = 0;
-        static String[] szenario = new String[] { "alle", "Scrap_Rework", "MTBF_Downtime" };
-        static int szenarioID = 2;
-        private static List<Double> GewinnSS = new List<Double>();
-        private static List<Double> GewinnOSS = new List<Double>();
-        //private static List<Position> Positions = new List<Position>();
-        //private static List<Product> Products = new List<Product>();
-        //private static readonly List<Job> Jobs = new List<Job>();
+        readonly static String[] szenario = new String[] { "alle", "Scrap_Rework", "MTBF_Downtime" };
+        readonly static int szenarioID = 2;
         private static SmartService SmartService;
-        static Dictionary<string, double> inputData = new Dictionary<string, double>();
+        readonly static Dictionary<string, double> inputData = new Dictionary<string, double>();
+        // Simulationsumgegbung wird hier schon erzeugt, da diese für die festlegung der Produktmenge benötigt wird
         private static Simulation env = new Simulation(randomSeed: 42);
-        //private static int ProductQuantity;
-        //private static double MaterialCost;
 
+#pragma warning disable IDE0060 // Nicht verwendete Parameter entfernen
         static void Main(string[] args)
+#pragma warning restore IDE0060 // Nicht verwendete Parameter entfernen
         {
-            //Console.SetOut(TextWriter.Null);
-            //Console.SetError(TextWriter.Null);
+            // Zeit messen, wie lange das Programm braucht
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
+
+            // Konfigurationsfile einlesen
+            // es können unterschiedliche Szenarien abgespeichert werden und oben in dem Array angegeben werden
+            // mit der ID kann das gewünschte Szenario ausgewählt werden
             string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data_" + szenario[szenarioID] + ".txt";
             if (File.Exists(curFile))
             {
@@ -41,6 +39,8 @@ namespace ProduktionssystemSimulation
                 Console.WriteLine("File does not exist.");
                 System.Environment.Exit(0);
             }
+
+            // Inputdata in Dictionary<string, double> abspeichern
             foreach (string line in File.ReadAllLines(curFile, Encoding.UTF8))
             {
                 string[] keyvalue = line.Split('=');
@@ -50,11 +50,6 @@ namespace ProduktionssystemSimulation
                 }
             }
            
-            //StreamWriter jobsCSV = new StreamWriter("Jobs.txt");
-            //foreach(Job i in Jobs)
-            //{
-            //    jobsCSV.WriteLine(i.ToString() + "\n");
-            //}
             SmartService = new SmartService(
                 inputData["Scrap"],
                 inputData["MTBFMean"],
@@ -62,26 +57,27 @@ namespace ProduktionssystemSimulation
                 inputData["DowntimeSigma"],
                 inputData["Rework"]
             );
-            // mit SS
+
+            // Durchläufe mit SS
             int seed = 0;
             StreamWriter swKPISS = new StreamWriter("KPISS_"+szenario[szenarioID]+".csv");
+            List<Double> GewinnSS = new List<Double>();
+            List<Double> GewinnOSS = new List<Double>();
 
-            //List<Job> Jobs = Jobgenerator();
-            //Console.WriteLine("Jobs1 == Jobs2: " + EqualityComparer<List<Job>>.Default.Equals(Jobs1, Jobs1));
-            List<List<Job>> JobsListe = new List<List<Job>>();
-            //for(int i = 0; i< inputData["Rounds"]; i++)
-            //{
-            //    JobsListe.Add(Jobgenerator());
-            //}
+            // CSV header hinzufügen
             swKPISS.Write("AvailabilityPre;AvailabilityMain;AvailabilityPost;EffectivenessPre;EffectivenessMain;EffectivenessPost;ThrouputratePre;ThrouputrateMain;ThrouputratePost;ScrapRatioPre;ScrapRatioMain;ScrapRatioPost;ReworkRatioPre;ReworkRatioMain;ReworkRatioPost;NAMain;NAPost;NAPre;QBRPre;QBRMain;QBRPost;MTBFPre;MTTRPre;MTBFMain;MTTRMain;MTBFPost;MTTRPost;OEEPre;OEEMain;OEEPost;Gewinn\n");
-
+            
+            int i = 0;
             while (i < inputData["Rounds"])
             {
-                //randomSeed: 42
                 ProcessControl pc = new ProcessControl(Jobgenerator(), SmartService, inputData, new Simulation(randomSeed: seed));
-                var tupelKPIProfit = pc.Simulate();
+
+                (Dictionary<string, double>, double) tupelKPIProfit = pc.Simulate();
+
+                // Gewinn für den geldwerten Vorteil speichern, damit der Durchschnitt errechnet werden kann
                 GewinnSS.Add(tupelKPIProfit.Item2);
-                //swGSS.WriteLine(tupelKPIProfit.Item2);
+
+                // KPIs und den Gewinn in CSV schreiben
                 foreach (var pair in tupelKPIProfit.Item1)
                 {
                     swKPISS.Write("{0};", pair.Value);
@@ -97,9 +93,7 @@ namespace ProduktionssystemSimulation
 
             swKPISS.Close();
             
-            // ohne SS
-            Console.WriteLine("SS ist fertig.");
-            i = 0;
+            // Durchläufe ohne SS
             SmartService = new SmartService(
                 0,
                 0,
@@ -107,18 +101,25 @@ namespace ProduktionssystemSimulation
                 0,
                 0
             );
-            seed = 0;
+           
             StreamWriter swKPIOSS = new StreamWriter("KPIOSS" + szenario[szenarioID] + ".csv");
-
+            seed = 0;    
+            i = 0;
             env = new Simulation(randomSeed: 42);
+
+            // CSV header setzten
             swKPIOSS.Write("AvailabilityPre;AvailabilityMain;AvailabilityPost;EffectivenessPre;EffectivenessMain;EffectivenessPost;ThrouputratePre;ThrouputrateMain;ThrouputratePost;ScrapRatioPre;ScrapRatioMain;ScrapRatioPost;ReworkRatioPre;ReworkRatioMain;ReworkRatioPost;NAMain;NAPost;NAPre;QBRPre;QBRMain;QBRPost;MTBFPre;MTTRPre;MTBFMain;MTTRMain;MTBFPost;MTTRPost;OEEPre;OEEMain;OEEPost;Gewinn\n");
 
             while (i < inputData["Rounds"])
             {
                 //randomSeed: 42
                 ProcessControl pc = new ProcessControl(Jobgenerator(), SmartService, inputData, new Simulation(randomSeed: seed));
-                var tupelKPIProfit = pc.Simulate();
+                
+                (Dictionary<string, double>, double) tupelKPIProfit = pc.Simulate();
+
+                // Gewinn für den geldwerten Vorteil speichern, damit der Durchschnitt errechnet werden kann
                 GewinnOSS.Add(tupelKPIProfit.Item2);
+
                 //swGOSS.WriteLine(tupelKPIProfit.Item2);
                 foreach (var pair in tupelKPIProfit.Item1)
                 {
@@ -136,18 +137,20 @@ namespace ProduktionssystemSimulation
             }
             swKPIOSS.Close();
 
-           
             StreamWriter Vorteil = new StreamWriter("GeldwerterVorteil" + szenario[szenarioID] + ".csv");
+
             double averageSS = GewinnSS.Average();
             double averageOSS = GewinnOSS.Average();
             double profit = averageSS - averageOSS;
-            Console.WriteLine(profit);
+
             Vorteil.WriteLine("Gewinn Average SS: {0}", averageSS);
             Vorteil.WriteLine("Gewinn Average OSS: {0}", averageOSS);
             Vorteil.WriteLine("Geldwerter Vorteil: {0}", profit);
+            Vorteil.Close();
+
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
-            Vorteil.Close();
+        
             // Format and display the TimeSpan value.
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
                 ts.Hours, ts.Minutes, ts.Seconds,
@@ -155,68 +158,14 @@ namespace ProduktionssystemSimulation
             Console.WriteLine("RunTime " + elapsedTime);
         }
 
-        public static List<Job> Jobgenerator()
-        {
-            List<Job> Jobs = new List<Job>();
-            for (int i = 0; i < 150; i++)
-            {
-                List<Position> Positions = new List<Position>();
-                for (int k = 1; k <= inputData["NumberPosition"]; k++)
-                {
-                    List<Product> Products = new List<Product>();
-                    int ProductQuantity = 0;
-                    do
-                    {
-                        ProductQuantity = (int)env.RandLogNormal2(inputData[$"QuantityMean{k}"], inputData[$"QuantitySigma{k}"]);
-                    } while (ProductQuantity <= 0);
-
-                    double MaterialCost = 15;
-                    //MaterialCost = env.RandNormalPositive(inputData[$"MaterialCostsPerProductMean{k}"], inputData[$"MaterialCostsPerProductSigma{k}"]);
-                    // Verteilung um Anzahl der Produkte festzulegen
-                    for (int j = 1; j <= ProductQuantity; j++)
-                    {
-                        Products.Add(new Product(
-                            j,
-                            TimeSpan.FromDays(inputData["ProductionTimeProductPreMean"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductMainMean"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductPostMean"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductPreSigma"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductMainSigma"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductPostSigma"]),
-                            TimeSpan.FromDays(inputData["ReworkTimeMean"]),
-                            TimeSpan.FromDays(inputData["ReworkTimeSigma"])
-                            ));
-                        
-                    }
-
-                    Positions.Add(new Position(
-                        ProductQuantity,
-                        k,
-                        Products,
-                        inputData[$"ScrapRatioPreMean{k}"],
-                        inputData[$"ScrapRatioMainMean{k}"],
-                        inputData[$"ScrapRatioPostMean{k}"],
-                        inputData[$"ReworkRatioPreMean{k}"],
-                        inputData[$"ReworkRatioMainMean{k}"],
-                        inputData[$"ReworkRatioPostMean{k}"],
-                        TimeSpan.FromDays(inputData[$"SetupTimeMean{k}"]),
-                        TimeSpan.FromDays(inputData[$"SetupTimeSigma{k}"]),
-                        MaterialCost,
-                        inputData[$"Price{k}"]
-                        )); 
-                }
-
-                Jobs.Add(new Job(i, i + 1, Positions));
-            }
-            return Jobs;
-        }
+        
 
         public static List<Job> CopyJobs(List<Job> oldJobs)
         {
             List<Job> Jobs = new List<Job>();
             for (int i = 0; i < oldJobs.Count; i++)
             {
-                List<Position> Positions = new List<Position>();
+                List<Producttype> Positions = new List<Producttype>();
                 for (int k = 1; k <= inputData["NumberPosition"]; k++)
                 {
                     List<Product> Products = new List<Product>();
@@ -240,7 +189,7 @@ namespace ProduktionssystemSimulation
                             ));
                     }
 
-                    Positions.Add(new Position(
+                    Positions.Add(new Producttype(
                         ProductQuantity,
                         k,
                         Products,
