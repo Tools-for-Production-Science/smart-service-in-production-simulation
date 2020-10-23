@@ -36,7 +36,7 @@ namespace ProduktionssystemSimulation
             // Diese Methode muss aufgerufen werden, um das IsOk-Flag des Prozesses auf true zurückzusetzen.
             if (env.ActiveProcess.HandleFault())
             {
-                pc.BrokenPost = true;
+                pc.brokenPost = true;
                 //Env.Log("Break Machine Postprocess");
 
                 TimeSpan downtime = env.RandLogNormal2(TimeSpan.FromDays(downtimePostMean), TimeSpan.FromDays(downtimePostSigma));
@@ -46,7 +46,7 @@ namespace ProduktionssystemSimulation
                 product.Broken = true;
                 yield return env.Timeout(downtime);
                 //Env.Log("Machine in Postprocess repaired");
-                pc.BrokenPost = false;
+                pc.brokenPost = false;
             }
             // Maschine wieder frei geben, sobald das Produkt fertig produziert ist.
             machine.Release(req);

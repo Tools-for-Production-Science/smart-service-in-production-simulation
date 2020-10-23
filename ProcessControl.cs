@@ -9,41 +9,41 @@ namespace ProduktionssystemSimulation
 {
     public class ProcessControl 
     {
-        private Simulation Env;
-        private List<Job> Jobs;
-        private Preprocess Preprocess;
-        private Mainprocess Mainprocess;
-        private Postprocess Postprocess;
-        private Process ProcessPre;
-        private Process ProcessMain;
-        private Process ProcessPost;
-        public TimeSpan MtbfPre;
-        public TimeSpan MtbfMain;
-        public TimeSpan MtbfPost;
-        public bool BrokenPre = false;
-        public bool BrokenMain = false;
-        public bool BrokenPost = false;
-        int ProducedQuanity = 0;
-        Store ProducedProducts;
-        Store ProductsToProduce;
-        Dictionary<string, double> InputData = new Dictionary<string, double>();
-        private ArrayList FinishedJobs = new ArrayList();
-        private Analysis analysis;
-        private SmartService SmartService;
+        readonly private Simulation env;
+        readonly private List<Job> jobs;
+        readonly private Preprocess preprocess;
+        readonly private Mainprocess mainprocess;
+        readonly private Postprocess postprocess;
+        private Process processPre;
+        private Process processMain;
+        private Process processPost;
+        public TimeSpan mtbfPre;
+        public TimeSpan mtbfMain;
+        public TimeSpan mtbfPost;
+        public bool brokenPre = false;
+        public bool brokenMain = false;
+        public bool brokenPost = false;
+        int producedQuanity = 0;
+        Store producedProducts;
+        Store productsToProduce;
+        readonly Dictionary<string, double> inputData = new Dictionary<string, double>();
+        readonly private ArrayList finishedJobs = new ArrayList();
+        readonly private Analysis analysis;
+        readonly private SmartService smartService;
 
         public ProcessControl(List<Job> jobs, SmartService smartService, Dictionary<string, double> inputData, Simulation env)
         {
-            Jobs = jobs;
-            SmartService = smartService;
+            this.jobs = jobs;
+            this.smartService = smartService;
             analysis = new Analysis(inputData);
-            Preprocess = new Preprocess(this, env, inputData["DowntimePreMean"], inputData["DowntimePreSigma"], analysis);
-            Mainprocess = new Mainprocess(this, env, smartService, inputData["DowntimeMainMean"], inputData["DowntimeMainSigma"], analysis);
-            Postprocess = new Postprocess(this, env, inputData["DowntimePostMean"], inputData["DowntimePostSigma"], analysis);
-            MtbfPre = TimeSpan.FromDays(inputData["MTBFPre"]);
-            MtbfMain = TimeSpan.FromDays(inputData["MTBFMain"] * (1 + smartService.MTBFMean));
-            MtbfPost = TimeSpan.FromDays(inputData["MTBFPost"]);
-            InputData = inputData;
-            Env = env;
+            preprocess = new Preprocess(this, env, inputData["DowntimePreMean"], inputData["DowntimePreSigma"], analysis);
+            mainprocess = new Mainprocess(this, env, smartService, inputData["DowntimeMainMean"], inputData["DowntimeMainSigma"], analysis);
+            postprocess = new Postprocess(this, env, inputData["DowntimePostMean"], inputData["DowntimePostSigma"], analysis);
+            mtbfPre = TimeSpan.FromDays(inputData["MTBFPre"]);
+            mtbfMain = TimeSpan.FromDays(inputData["MTBFMain"] * (1 + smartService.MTBFMean));
+            mtbfPost = TimeSpan.FromDays(inputData["MTBFPost"]);
+            this.inputData = inputData;
+            this.env = env;
         }
 
         public IEnumerable<Event> JobInProcess(Simulation env, Resource mPre, Resource mMain, Resource mPost, List<Job> jobs)
@@ -62,9 +62,9 @@ namespace ProduktionssystemSimulation
             
             foreach (Producttype position in job.Positions)
             {
-                ProducedProducts = new Store(env, (int)position.Quantity);
-                ProductsToProduce = new Store(env);
-                ProducedQuanity = 0;
+                producedProducts = new Store(env, (int)position.Quantity);
+                productsToProduce = new Store(env);
+                producedQuanity = 0;
                 position.TotalProducedQuantity = 0;
                 //Console.WriteLine(job.ID +" " + position.TotalProducedQuantity);
 
@@ -80,24 +80,24 @@ namespace ProduktionssystemSimulation
                 //env.Log("End of setup");
                 foreach (Product product in position.Products)
                 {
-                    ProductsToProduce.Put(product);
+                    productsToProduce.Put(product);
                 }
 
-                while (ProducedQuanity != position.Quantity)
+                while (producedQuanity != position.Quantity)
                 {
-                    getPipe = ProductsToProduce.Get();
+                    getPipe = productsToProduce.Get();
                     // warte bis ein neues Teil produziert werden muss, oder alle Teile schon produziert sind
-                    yield return getPipe | ProducedProducts.WhenFull();
-                    if (ProducedProducts.Count == position.Quantity)
+                    yield return getPipe | producedProducts.WhenFull();
+                    if (producedProducts.Count == position.Quantity)
                     {
                         break;
                     }
                     Product product = (Product)getPipe.Value;
                     position.TotalProducedQuantity += 1;
-                    env.Process(Production(env, mPre, mMain, mPost, position, product, ProductsToProduce));
+                    env.Process(Production(env, mPre, mMain, mPost, position, product, productsToProduce));
                 } 
             }
-            FinishedJobs.Add(job);
+            finishedJobs.Add(job);
             yield break;
         }
 
@@ -107,7 +107,7 @@ namespace ProduktionssystemSimulation
             //env.Log("{0} ProductNo {1}: Here I am", arrive, product.ID);
             Request reqPre = mPre.Request();
             yield return reqPre;
-            yield return ProcessPre = env.Process(Preprocess.ProductionStep(mPre, reqPre, product));
+            yield return processPre = env.Process(preprocess.ProductionStep(mPre, reqPre, product));
             if (!product.Broken) { yield return env.Process(ReviewRework.ReviewPre(env, position, product, analysis));}
             if (product.Broken)
             {
@@ -120,10 +120,10 @@ namespace ProduktionssystemSimulation
             {
                 var reqMain = mMain.Request();
                 yield return reqMain;
-                yield return ProcessMain = env.Process(Mainprocess.ProductionStep( mMain, reqMain, product));
+                yield return processMain = env.Process(mainprocess.ProductionStep( mMain, reqMain, product));
                 if (!product.Broken)
                 {
-                    yield return env.Process(ReviewRework.ReviewMain(env, position, product, SmartService, analysis));
+                    yield return env.Process(ReviewRework.ReviewMain(env, position, product, smartService, analysis));
                 }
                 if (product.Broken)
                 {
@@ -136,7 +136,7 @@ namespace ProduktionssystemSimulation
                 {
                     var reqPost = mPost.Request();
                     yield return reqPost;
-                    yield return ProcessPost = env.Process(Postprocess.ProductionStep( mPost, reqPost, product));
+                    yield return processPost = env.Process(postprocess.ProductionStep( mPost, reqPost, product));
                     if (!product.Broken)
                     {
                         yield return env.Process(ReviewRework.ReviewPost(env, position, product, analysis));
@@ -150,8 +150,8 @@ namespace ProduktionssystemSimulation
                     }
                     else
                     {   
-                        ProducedProducts.Put(product);
-                        ProducedQuanity++;
+                        producedProducts.Put(product);
+                        producedQuanity++;
                         //Console.WriteLine("Produced quantity: " + ProducedQuanity);
                     }
                 }
@@ -163,15 +163,15 @@ namespace ProduktionssystemSimulation
             while (true)
             {
                 // Ausfallwahrscheinlichkeit für M
-                TimeSpan failure = env.RandExponential(MtbfPost);
+                TimeSpan failure = env.RandExponential(mtbfPost);
                 //env.Log("{0}", failure);
                 //analysis.ADOTPre = analysis.ADOTPre.Add(failure);
                 yield return env.Timeout(failure);
-                if (ProcessPre != null && !BrokenPre && ProcessPre.IsOk && ProcessPre.IsAlive)
+                if (processPre != null && !brokenPre && processPre.IsOk && processPre.IsAlive)
                 {
                     //env.Log("Break Machine Pre");
                     analysis.NumberOfFailurePre = analysis.NumberOfFailurePre +1;
-                    ProcessPre.Interrupt();
+                    processPre.Interrupt();
                 }
             }
         }
@@ -180,15 +180,15 @@ namespace ProduktionssystemSimulation
         {
             while (true)
             {
-                TimeSpan failure = env.RandExponential(MtbfPost);
+                TimeSpan failure = env.RandExponential(mtbfPost);
                 //env.Log("{0}", failure);
                 //analysis.ADOTMain = analysis.ADOTMain.Add(failure);
                 yield return env.Timeout(failure);
-                if (ProcessMain != null && !BrokenMain && ProcessMain.IsOk && ProcessMain.IsAlive)
+                if (processMain != null && !brokenMain && processMain.IsOk && processMain.IsAlive)
                 {
                     //env.Log("Break Machine Main");
                     analysis.NumberOfFailureMain = analysis.NumberOfFailureMain+1;
-                    ProcessMain.Interrupt();   
+                    processMain.Interrupt();   
                 }
             }
         }
@@ -197,15 +197,15 @@ namespace ProduktionssystemSimulation
             while (true)
             {
                 // Ausfallwahrscheinlichkeit für M
-                TimeSpan failure = env.RandExponential(MtbfPost);
+                TimeSpan failure = env.RandExponential(mtbfPost);
                 //env.Log("{0}",failure);
                 //analysis.ADOTPost = analysis.ADOTPost.Add(failure);
                 yield return env.Timeout(failure);
-                if (ProcessPost != null && !BrokenPost && ProcessPost.IsOk && ProcessPost.IsAlive)
+                if (processPost != null && !brokenPost && processPost.IsOk && processPost.IsAlive)
                 {
                     //env.Log("Break Machine Post");
                     analysis.NumberOfFailurePost = analysis.NumberOfFailurePost+1;
-                    ProcessPost.Interrupt();
+                    processPost.Interrupt();
                 }
             }
         }
@@ -214,40 +214,40 @@ namespace ProduktionssystemSimulation
         { 
             //Env.Log("======= Production Factory ========");
             
-            Resource MPreprocess = new Resource(Env, (int) InputData["CapacityPre"])
+            Resource MPreprocess = new Resource(env, (int) inputData["CapacityPre"])
             {
-                Utilization = new TimeSeriesMonitor(Env, name: "M1 Utilization"),
+                Utilization = new TimeSeriesMonitor(env, name: "M1 Utilization"),
                 WaitingTime = new SampleMonitor(name: "M1 Waiting time", collect: true),
-                QueueLength = new TimeSeriesMonitor(Env, name: "M1 Queue Length", collect: true),
+                QueueLength = new TimeSeriesMonitor(env, name: "M1 Queue Length", collect: true),
             };
-            Resource MMainprocess = new Resource(Env, (int)InputData["CapacityMain"])
+            Resource MMainprocess = new Resource(env, (int)inputData["CapacityMain"])
             {
-                Utilization = new TimeSeriesMonitor(Env, name: "M2 Utilization"),
+                Utilization = new TimeSeriesMonitor(env, name: "M2 Utilization"),
                 WaitingTime = new SampleMonitor(name: "M2 Waiting time", collect: true),
-                QueueLength = new TimeSeriesMonitor(Env, name: "M2 Queue Length", collect: true),
+                QueueLength = new TimeSeriesMonitor(env, name: "M2 Queue Length", collect: true),
             };
-            Resource MPostprocess = new Resource(Env, (int)InputData["CapacityPost"])
+            Resource MPostprocess = new Resource(env, (int)inputData["CapacityPost"])
             {
-                Utilization = new TimeSeriesMonitor(Env, name: "M3 Utilization"),
+                Utilization = new TimeSeriesMonitor(env, name: "M3 Utilization"),
                 WaitingTime = new SampleMonitor(name: "M3 Waiting time", collect: true),
-                QueueLength = new TimeSeriesMonitor(Env, name: "M3 Queue Length", collect: true),
+                QueueLength = new TimeSeriesMonitor(env, name: "M3 Queue Length", collect: true),
             };
             
-            Env.Process(JobInProcess(Env, MPreprocess, MMainprocess, MPostprocess, Jobs));
-            if (MtbfPre != TimeSpan.FromDays(0))
+            env.Process(JobInProcess(env, MPreprocess, MMainprocess, MPostprocess, jobs));
+            if (mtbfPre != TimeSpan.FromDays(0))
             {
-                Env.Process(BreakMachinePreprocess(Env));
+                env.Process(BreakMachinePreprocess(env));
             }
-            if (MtbfMain != TimeSpan.FromDays(0))
+            if (mtbfMain != TimeSpan.FromDays(0))
             {
-                Env.Process(BreakMachineMainprocess(Env));
+                env.Process(BreakMachineMainprocess(env));
             }
-            if (MtbfPost != TimeSpan.FromDays(0))
+            if (mtbfPost != TimeSpan.FromDays(0))
             {
-                Env.Process(BreakMachinePostprocess(Env));
+                env.Process(BreakMachinePostprocess(env));
             }
             
-            FinishedJobs.Clear();
+            finishedJobs.Clear();
            
             //Env.Log(MPreprocess.Utilization.Summarize());
             //Env.Log(MPreprocess.WaitingTime.Summarize());
@@ -267,8 +267,8 @@ namespace ProduktionssystemSimulation
             //  .SetPeriodicUpdate(TimeSpan.FromHours(20), withHeaders: false)
             //  .Build();
             //report.WriteHeader(); 
-            Env.Run(TimeSpan.FromHours(InputData["WorkingHours"]));
-            analysis.FinishedJobs = FinishedJobs;
+            env.Run(TimeSpan.FromHours(inputData["WorkingHours"]));
+            analysis.FinishedJobs = finishedJobs;
             return (analysis.CalculateKPIs(), analysis.Profit());
             //FinishedJobs.ToList().ForEach(i => Console.WriteLine(i.ToString()));
         } 

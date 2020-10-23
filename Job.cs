@@ -4,6 +4,7 @@ using System.Text;
 
 namespace ProduktionssystemSimulation
 {
+    [Serializable()]
     public class Job
     {
         private int _priority;

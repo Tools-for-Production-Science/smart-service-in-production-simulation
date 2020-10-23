@@ -37,7 +37,7 @@ namespace ProduktionssystemSimulation
             // Diese Methode muss aufgerufen werden, um das IsOk-Flag des Prozesses auf true zurückzusetzen.
             if (env.ActiveProcess.HandleFault())
             {
-                pc.BrokenPre = true;
+                pc.brokenPre = true;
                 //Env.Log("Break Machine in Preprocess");
 
                 TimeSpan downtime = env.RandLogNormal2(TimeSpan.FromDays(downtimePreMean), TimeSpan.FromDays(downtimePreSigma));
@@ -51,7 +51,7 @@ namespace ProduktionssystemSimulation
 
                 yield return env.Timeout(downtime);
                 //Env.Log("Machine in Preprocess repaired");
-                pc.BrokenPre = false;
+                pc.brokenPre = false;
             }
 
             // Maschine wieder frei geben, sobald das Produkt fertig produziert ist.

@@ -38,7 +38,7 @@ namespace ProduktionssystemSimulation
             // Diese Methode muss aufgerufen werden, um das IsOk-Flag des Prozesses auf true zurückzusetzen.
             if (env.ActiveProcess.HandleFault())
             {
-                pc.BrokenMain = true;
+                pc.brokenMain = true;
                 //Env.Log("Break Machine in Mainprocess");
 
                 TimeSpan downtime = TimeSpan.FromDays(env.RandLogNormal2(downtimeMainMean* (1  - smartService.DowntimeMean),downtimeMainSigma * (1 - smartService.DowntimeSigma)) );
@@ -51,7 +51,7 @@ namespace ProduktionssystemSimulation
                 product.Broken = true;
                 yield return env.Timeout(downtime);
                 //Env.Log("Machine in Mainprocess repaired");
-                pc.BrokenMain = false;
+                pc.brokenMain = false;
             }
 
             // Maschine wieder frei geben, sobald das Produkt fertig produziert ist.

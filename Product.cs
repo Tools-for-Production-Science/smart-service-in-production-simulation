@@ -4,6 +4,7 @@ using System.Text;
 
 namespace ProduktionssystemSimulation
 {
+    [Serializable()]
     public class Product
     {
         private int _ID;

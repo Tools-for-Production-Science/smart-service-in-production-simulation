@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using SimSharp;
 
@@ -29,7 +31,8 @@ namespace ProduktionssystemSimulation
             // Konfigurationsfile einlesen
             // es können unterschiedliche Szenarien abgespeichert werden und oben in dem Array angegeben werden
             // mit der ID kann das gewünschte Szenario ausgewählt werden
-            string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data_" + szenario[szenarioID] + ".txt";
+            //string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data_" + szenario[szenarioID] + ".txt";
+            string curFile = @"F:\data.txt";
             if (File.Exists(curFile))
             {
                 Console.WriteLine("File exists.");
@@ -58,19 +61,33 @@ namespace ProduktionssystemSimulation
                 inputData["Rework"]
             );
 
+            SmartService OhneSmartService = new SmartService(
+                0,
+                0,
+                0,
+                0,
+                0
+            );
+
             // Durchläufe mit SS
-            int seed = 0;
             StreamWriter swKPISS = new StreamWriter("KPISS_"+szenario[szenarioID]+".csv");
+            StreamWriter swKPIOSS = new StreamWriter("KPIOSS" + szenario[szenarioID] + ".csv");
             List<Double> GewinnSS = new List<Double>();
             List<Double> GewinnOSS = new List<Double>();
 
             // CSV header hinzufügen
             swKPISS.Write("AvailabilityPre;AvailabilityMain;AvailabilityPost;EffectivenessPre;EffectivenessMain;EffectivenessPost;ThrouputratePre;ThrouputrateMain;ThrouputratePost;ScrapRatioPre;ScrapRatioMain;ScrapRatioPost;ReworkRatioPre;ReworkRatioMain;ReworkRatioPost;NAMain;NAPost;NAPre;QBRPre;QBRMain;QBRPost;MTBFPre;MTTRPre;MTBFMain;MTTRMain;MTBFPost;MTTRPost;OEEPre;OEEMain;OEEPost;Gewinn\n");
-            
+            swKPIOSS.Write("AvailabilityPre;AvailabilityMain;AvailabilityPost;EffectivenessPre;EffectivenessMain;EffectivenessPost;ThrouputratePre;ThrouputrateMain;ThrouputratePost;ScrapRatioPre;ScrapRatioMain;ScrapRatioPost;ReworkRatioPre;ReworkRatioMain;ReworkRatioPost;NAMain;NAPost;NAPre;QBRPre;QBRMain;QBRPost;MTBFPre;MTTRPre;MTBFMain;MTTRMain;MTBFPost;MTTRPost;OEEPre;OEEMain;OEEPost;Gewinn\n");
+
             int i = 0;
-            while (i < inputData["Rounds"])
+            int seed = 0;
+
+            while (i < inputData["Iterations"])
             {
-                ProcessControl pc = new ProcessControl(Jobgenerator(), SmartService, inputData, new Simulation(randomSeed: seed));
+                (List<Job>, List<Job>) tupelListJobs = Jobgenerator.JobgeneratorS(inputData, seed+827);
+
+                //SS
+                ProcessControl pc = new ProcessControl(tupelListJobs.Item1, SmartService, inputData, new Simulation(randomSeed: seed));
 
                 (Dictionary<string, double>, double) tupelKPIProfit = pc.Simulate();
 
@@ -85,56 +102,30 @@ namespace ProduktionssystemSimulation
                         swKPISS.Write("{0}\n", tupelKPIProfit.Item2);
                     }
                 }
-                Console.WriteLine(i);
+                Console.WriteLine(seed);
+                // OSS
+                ProcessControl pc2 = new ProcessControl(tupelListJobs.Item2, OhneSmartService, inputData, new Simulation(randomSeed: seed));
 
-                i++;
-                seed += 33;
-            }
-
-            swKPISS.Close();
-            
-            // Durchläufe ohne SS
-            SmartService = new SmartService(
-                0,
-                0,
-                0,
-                0,
-                0
-            );
-           
-            StreamWriter swKPIOSS = new StreamWriter("KPIOSS" + szenario[szenarioID] + ".csv");
-            seed = 0;    
-            i = 0;
-            env = new Simulation(randomSeed: 42);
-
-            // CSV header setzten
-            swKPIOSS.Write("AvailabilityPre;AvailabilityMain;AvailabilityPost;EffectivenessPre;EffectivenessMain;EffectivenessPost;ThrouputratePre;ThrouputrateMain;ThrouputratePost;ScrapRatioPre;ScrapRatioMain;ScrapRatioPost;ReworkRatioPre;ReworkRatioMain;ReworkRatioPost;NAMain;NAPost;NAPre;QBRPre;QBRMain;QBRPost;MTBFPre;MTTRPre;MTBFMain;MTTRMain;MTBFPost;MTTRPost;OEEPre;OEEMain;OEEPost;Gewinn\n");
-
-            while (i < inputData["Rounds"])
-            {
-                //randomSeed: 42
-                ProcessControl pc = new ProcessControl(Jobgenerator(), SmartService, inputData, new Simulation(randomSeed: seed));
-                
-                (Dictionary<string, double>, double) tupelKPIProfit = pc.Simulate();
+                (Dictionary<string, double>, double) tupelKPIProfit2 = pc2.Simulate();
 
                 // Gewinn für den geldwerten Vorteil speichern, damit der Durchschnitt errechnet werden kann
-                GewinnOSS.Add(tupelKPIProfit.Item2);
+                GewinnOSS.Add(tupelKPIProfit2.Item2);
 
                 //swGOSS.WriteLine(tupelKPIProfit.Item2);
-                foreach (var pair in tupelKPIProfit.Item1)
+                foreach (var pair in tupelKPIProfit2.Item1)
                 {
                     swKPIOSS.Write("{0};", pair.Value);
                     if (pair.Key == "OEEPost")
                     {
-                        swKPIOSS.Write("{0}\n", tupelKPIProfit.Item2);
+                        swKPIOSS.Write("{0}\n", tupelKPIProfit2.Item2);
                     }
                 }
 
-                Console.WriteLine(i);
-
                 i++;
-                seed += 33;
+                seed += 345;
             }
+
+            swKPISS.Close();
             swKPIOSS.Close();
 
             StreamWriter Vorteil = new StreamWriter("GeldwerterVorteil" + szenario[szenarioID] + ".csv");
@@ -156,59 +147,6 @@ namespace ProduktionssystemSimulation
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.Milliseconds / 10);
             Console.WriteLine("RunTime " + elapsedTime);
-        }
-
-        
-
-        public static List<Job> CopyJobs(List<Job> oldJobs)
-        {
-            List<Job> Jobs = new List<Job>();
-            for (int i = 0; i < oldJobs.Count; i++)
-            {
-                List<Producttype> Positions = new List<Producttype>();
-                for (int k = 1; k <= inputData["NumberPosition"]; k++)
-                {
-                    List<Product> Products = new List<Product>();
-                    
-                    int ProductQuantity = oldJobs.ElementAt(i).Positions.ElementAt(k-1).Quantity;
-                    double MaterialCost = oldJobs.ElementAt(i).Positions.ElementAt(k-1).MaterialCost;
-                    //MaterialCost = env.RandNormalPositive(inputData[$"MaterialCostsPerProductMean{k}"], inputData[$"MaterialCostsPerProductSigma{k}"]);
-                    // Verteilung um Anzahl der Produkte festzulegen
-                    for (int j = 1; j <= ProductQuantity; j++)
-                    {
-                        Products.Add(new Product(
-                            j,
-                            TimeSpan.FromDays(inputData["ProductionTimeProductPreMean"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductMainMean"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductPostMean"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductPreSigma"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductMainSigma"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductPostSigma"]),
-                            TimeSpan.FromDays(inputData["ReworkTimeMean"]),
-                            TimeSpan.FromDays(inputData["ReworkTimeSigma"])
-                            ));
-                    }
-
-                    Positions.Add(new Producttype(
-                        ProductQuantity,
-                        k,
-                        Products,
-                        inputData[$"ScrapRatioPreMean{k}"],
-                        inputData[$"ScrapRatioMainMean{k}"],
-                        inputData[$"ScrapRatioPostMean{k}"],
-                        inputData[$"ReworkRatioPreMean{k}"],
-                        inputData[$"ReworkRatioMainMean{k}"],
-                        inputData[$"ReworkRatioPostMean{k}"],
-                        TimeSpan.FromDays(inputData[$"SetupTimeMean{k}"]),
-                        TimeSpan.FromDays(inputData[$"SetupTimeSigma{k}"]),
-                        MaterialCost,
-                        inputData[$"Price{k}"]
-                        ));
-                }
-
-                Jobs.Add(new Job(i, i + 1, Positions));
-            }
-            return Jobs;
         }
     }
 }
