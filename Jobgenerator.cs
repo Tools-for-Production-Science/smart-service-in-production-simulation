@@ -10,19 +10,21 @@ namespace ProduktionssystemSimulation
     public static class Jobgenerator
     {  
         private static Simulation env;
+        static Random random = new Random();
 
         // Generiert die benötigenten Aufträge und speichert diese in einer Liste ab
-        public static (List<Job>, List<Job>) JobgeneratorS(Dictionary<string, double> inputData, int seed)
+        public static (List<Job>, List<Job>) JobgeneratorS(Dictionary<string, double> inputData)
         {
             List<Job> Jobs1 = new List<Job>();
             List<Job> Jobs2 = new List<Job>();
-            env = new Simulation(randomSeed: seed);
+            env = new Simulation(randomSeed: random.Next());
 
-            for (int i = 0; i < inputData["NumberOfJobs"]; i++)
+            for (int j = 1; j <= inputData["NumberOfJobs"]; j = 1+j)
             {
-                List<Producttype> Positions1 = new List<Producttype>();
-                List<Producttype> Positions2 = new List<Producttype>();
-                for (int k = 1; k <= inputData["NumberPosition"]; k++)
+                List<Producttype> Producttype1 = new List<Producttype>();
+                List<Producttype> Producttype2 = new List<Producttype>();
+
+                for (int t = 1; t <= inputData["NumberPosition"]; t++)
                 {
                     List<Product> Products1 = new List<Product>();
                     List<Product> Products2 = new List<Product>();
@@ -30,15 +32,15 @@ namespace ProduktionssystemSimulation
 
                     do
                     {
-                        ProductQuantity = (int)env.RandLogNormal2(inputData[$"QuantityMean{k}"], inputData[$"QuantitySigma{k}"]);
+                        ProductQuantity = (int)env.RandLogNormal2(inputData[$"QuantityMean{t}"], inputData[$"QuantitySigma{t}"]);
                     } while (ProductQuantity <= 0);
 
-                    double MaterialCost = inputData[$"MaterialCostsPerProductMean{k}"];
+                    double MaterialCost = inputData[$"MaterialCostsPerProductMean{t}"];
 
-                    for (int j = 1; j <= ProductQuantity; j++)
+                    for (int p = 1; p <= ProductQuantity; p++)
                     {
                         Products1.Add(new Product(
-                            j,
+                            p,
                             TimeSpan.FromDays(inputData["ProductionTimeProductPreMean"]),
                             TimeSpan.FromDays(inputData["ProductionTimeProductMainMean"]),
                             TimeSpan.FromDays(inputData["ProductionTimeProductPostMean"]),
@@ -50,7 +52,7 @@ namespace ProduktionssystemSimulation
                             ));
 
                         Products2.Add(new Product(
-                            j,
+                            p,
                             TimeSpan.FromDays(inputData["ProductionTimeProductPreMean"]),
                             TimeSpan.FromDays(inputData["ProductionTimeProductMainMean"]),
                             TimeSpan.FromDays(inputData["ProductionTimeProductPostMean"]),
@@ -62,42 +64,43 @@ namespace ProduktionssystemSimulation
                             ));
                     }
 
-                    Positions1.Add(new Producttype(
+                    Producttype1.Add(new Producttype(
                         ProductQuantity,
-                        k,
+                        t,
                         Products1,
-                        inputData[$"ScrapRatioPreMean{k}"],
-                        inputData[$"ScrapRatioMainMean{k}"],
-                        inputData[$"ScrapRatioPostMean{k}"],
-                        inputData[$"ReworkRatioPreMean{k}"],
-                        inputData[$"ReworkRatioMainMean{k}"],
-                        inputData[$"ReworkRatioPostMean{k}"],
-                        TimeSpan.FromDays(inputData[$"SetupTimeMean{k}"]),
-                        TimeSpan.FromDays(inputData[$"SetupTimeSigma{k}"]),
+                        inputData[$"ScrapRatioPreMean{t}"],
+                        inputData[$"ScrapRatioMainMean{t}"],
+                        inputData[$"ScrapRatioPostMean{t}"],
+                        inputData[$"ReworkRatioPreMean{t}"],
+                        inputData[$"ReworkRatioMainMean{t}"],
+                        inputData[$"ReworkRatioPostMean{t}"],
+                        TimeSpan.FromDays(inputData[$"SetupTimeMean{t}"]),
+                        TimeSpan.FromDays(inputData[$"SetupTimeSigma{t}"]),
                         MaterialCost,
-                        inputData[$"Price{k}"]
+                        inputData[$"Price{t}"]
                         ));
 
-                    Positions2.Add(new Producttype(
+                    Producttype2.Add(new Producttype(
                         ProductQuantity,
-                        k,
+                        t,
                         Products1,
-                        inputData[$"ScrapRatioPreMean{k}"],
-                        inputData[$"ScrapRatioMainMean{k}"],
-                        inputData[$"ScrapRatioPostMean{k}"],
-                        inputData[$"ReworkRatioPreMean{k}"],
-                        inputData[$"ReworkRatioMainMean{k}"],
-                        inputData[$"ReworkRatioPostMean{k}"],
-                        TimeSpan.FromDays(inputData[$"SetupTimeMean{k}"]),
-                        TimeSpan.FromDays(inputData[$"SetupTimeSigma{k}"]),
+                        inputData[$"ScrapRatioPreMean{t}"],
+                        inputData[$"ScrapRatioMainMean{t}"],
+                        inputData[$"ScrapRatioPostMean{t}"],
+                        inputData[$"ReworkRatioPreMean{t}"],
+                        inputData[$"ReworkRatioMainMean{t}"],
+                        inputData[$"ReworkRatioPostMean{t}"],
+                        TimeSpan.FromDays(inputData[$"SetupTimeMean{t}"]),
+                        TimeSpan.FromDays(inputData[$"SetupTimeSigma{t}"]),
                         MaterialCost,
-                        inputData[$"Price{k}"]
+                        inputData[$"Price{t}"]
                         ));
                 }
 
-                Jobs1.Add(new Job(i, i + 1, Positions1));
-                Jobs2.Add(new Job(i, i + 1, Positions2));
+                Jobs1.Add(new Job(j, j, Producttype1));
+                Jobs2.Add(new Job(j, j, Producttype2));
             }
+            
             return (Jobs1, Jobs2);
         }
     }

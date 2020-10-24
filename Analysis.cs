@@ -23,7 +23,7 @@ namespace ProduktionssystemSimulation
         private double _NumberOfFailurePre;
         private double _NumberOfFailureMain;
         private double _NumberOfFailurePost;
-        private ArrayList _FinishedJobs = new ArrayList();
+        private List<Job> _FinishedJobs = new List<Job>();
         private TimeSpan _MaschineAnPre = TimeSpan.FromDays(0);
         private TimeSpan _MaschineAnMain = TimeSpan.FromDays(0);
         private TimeSpan _MaschineAnPost = TimeSpan.FromDays(0);
@@ -65,7 +65,7 @@ namespace ProduktionssystemSimulation
         public double NumberOfFailurePost { get => _NumberOfFailurePost; set => _NumberOfFailurePost = value; }
         public double Costs { get => _Costs; set => _Costs = value; }
         public Dictionary<string, double> InputData { get => _InputData; set => _InputData = value; }
-        public ArrayList FinishedJobs { get => _FinishedJobs; set => _FinishedJobs = value; }
+        public List<Job> FinishedJobs { get => _FinishedJobs; set => _FinishedJobs = value; }
 
         public Dictionary<string, double> CalculateKPIs()
         {
@@ -112,8 +112,8 @@ namespace ProduktionssystemSimulation
             KPIs.Add("QBRPost", ((QuantityOfReworkPost + QuantityOfGoodPost) / (QuantityOfGoodPost + QuantityOfReworkPost + QuantityOfScrapPost)));
             if (NumberOfFailurePre != 0)
             {
-                KPIs.Add("MTBFPre", InputData["WorkingHours"] / NumberOfFailurePre);
-                KPIs.Add("MTTRPre", ADOTPre.TotalHours / NumberOfFailurePre);
+                KPIs.Add("MTBFPre", (InputData["WorkingHours"] / NumberOfFailurePre)/24 );
+                KPIs.Add("MTTRPre", ADOTPre.TotalDays / NumberOfFailurePre);
             }else
             {
                 KPIs.Add("MTBFPre", 0);
@@ -121,8 +121,8 @@ namespace ProduktionssystemSimulation
             }
             if (NumberOfFailureMain != 0)
             {
-                KPIs.Add("MTBFMain", InputData["WorkingHours"] / NumberOfFailureMain);
-                KPIs.Add("MTTRMain", ADOTMain.TotalHours / NumberOfFailureMain);
+                KPIs.Add("MTBFMain", (InputData["WorkingHours"] / NumberOfFailureMain)/24);
+                KPIs.Add("MTTRMain", ADOTMain.TotalDays / NumberOfFailureMain);
             }
             else
             {
@@ -131,8 +131,8 @@ namespace ProduktionssystemSimulation
             }
             if (NumberOfFailurePost!=0)
             {
-                KPIs.Add("MTBFPost", InputData["WorkingHours"] / NumberOfFailurePost);
-                KPIs.Add("MTTRPost", ADOTPost.TotalHours / NumberOfFailurePost);
+                KPIs.Add("MTBFPost", (InputData["WorkingHours"] / NumberOfFailurePost)/24);
+                KPIs.Add("MTTRPost", ADOTPost.TotalDays / NumberOfFailurePost);
             }
             else
             {
@@ -145,12 +145,12 @@ namespace ProduktionssystemSimulation
             return KPIs;
         }
 
-        public double Profit()
+        public double Profit(List<Job> finishedJobs)
         {
             ManufactoringCosts = (InputData["WorkingHours"]-((ADOTPre.TotalMinutes+ ADOTMain.TotalMinutes+ ADOTPost.TotalMinutes) /60))*InputData["MachineHourCosts"]; 
-            foreach (Job j in FinishedJobs)
+            foreach (Job j in finishedJobs)
             {
-                foreach (Producttype p in j.Positions)
+                foreach (Producttype p in j.Producttype)
                 {
                     //Console.WriteLine("Menge: " +p.Quantity);
                     //Console.WriteLine("Totale Menge: " + p.TotalProducedQuantity);

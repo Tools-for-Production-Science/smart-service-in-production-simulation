@@ -8,19 +8,19 @@ namespace ProduktionssystemSimulation
     {
         private int _priority;
         private int _id;
-        private List<Producttype> _positions;
+        private List<Producttype> _producttype;
 
-        public Job(int priority, int id, List<Producttype> positions)
+        public Job(int priority, int id, List<Producttype> producttype)
         {
             Priority = priority;
             ID = id;
-            Positions = positions;
+            Producttype = producttype;
         }
 
 
         public int Priority { get => _priority; set => _priority = value; }
         public int ID { get => _id; set => _id = value; }
-        public List<Producttype> Positions { get => _positions; set => _positions = value; }
+        public List<Producttype> Producttype { get => _producttype; set => _producttype = value; }
 
     }
 }

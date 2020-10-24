@@ -14,11 +14,11 @@ namespace ProduktionssystemSimulation
     class Program
     {
         readonly static String[] szenario = new String[] { "alle", "Scrap_Rework", "MTBF_Downtime" };
-        readonly static int szenarioID = 2;
+        readonly static int szenarioID = 1;
         private static SmartService SmartService;
         readonly static Dictionary<string, double> inputData = new Dictionary<string, double>();
         // Simulationsumgegbung wird hier schon erzeugt, da diese für die festlegung der Produktmenge benötigt wird
-        private static Simulation env = new Simulation(randomSeed: 42);
+        static Random random = new Random();
 
 #pragma warning disable IDE0060 // Nicht verwendete Parameter entfernen
         static void Main(string[] args)
@@ -31,8 +31,8 @@ namespace ProduktionssystemSimulation
             // Konfigurationsfile einlesen
             // es können unterschiedliche Szenarien abgespeichert werden und oben in dem Array angegeben werden
             // mit der ID kann das gewünschte Szenario ausgewählt werden
-            //string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data_" + szenario[szenarioID] + ".txt";
-            string curFile = @"F:\data.txt";
+            string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data_" + szenario[szenarioID] + ".txt";
+            //string curFile = @"F:\data.txt";
             if (File.Exists(curFile))
             {
                 Console.WriteLine("File exists.");
@@ -61,7 +61,7 @@ namespace ProduktionssystemSimulation
                 inputData["Rework"]
             );
 
-            SmartService OhneSmartService = new SmartService(
+            SmartService withoutSmartService = new SmartService(
                 0,
                 0,
                 0,
@@ -69,75 +69,149 @@ namespace ProduktionssystemSimulation
                 0
             );
 
-            // Durchläufe mit SS
-            StreamWriter swKPISS = new StreamWriter("KPISS_"+szenario[szenarioID]+".csv");
-            StreamWriter swKPIOSS = new StreamWriter("KPIOSS" + szenario[szenarioID] + ".csv");
-            List<Double> GewinnSS = new List<Double>();
-            List<Double> GewinnOSS = new List<Double>();
+            StreamWriter outputSS = new StreamWriter("Output_SS_"+szenario[szenarioID]+".csv");
+            StreamWriter outputOSS = new StreamWriter("Output_OSS_" + szenario[szenarioID] + ".csv");
+            List<double> GewinnSS = new List<double>();
+            List<double> GewinnOSS = new List<double>();
+            List<List<Job>> saveJobsSS = new List<List<Job>>();
+            List<List<Job>> saveJobsOSS = new List<List<Job>>();
+            List<List<double>> profitYearSS = new List<List<double>>();
+            List<List<double>> profitYearOSS = new List<List<double>>();
 
             // CSV header hinzufügen
-            swKPISS.Write("AvailabilityPre;AvailabilityMain;AvailabilityPost;EffectivenessPre;EffectivenessMain;EffectivenessPost;ThrouputratePre;ThrouputrateMain;ThrouputratePost;ScrapRatioPre;ScrapRatioMain;ScrapRatioPost;ReworkRatioPre;ReworkRatioMain;ReworkRatioPost;NAMain;NAPost;NAPre;QBRPre;QBRMain;QBRPost;MTBFPre;MTTRPre;MTBFMain;MTTRMain;MTBFPost;MTTRPost;OEEPre;OEEMain;OEEPost;Gewinn\n");
-            swKPIOSS.Write("AvailabilityPre;AvailabilityMain;AvailabilityPost;EffectivenessPre;EffectivenessMain;EffectivenessPost;ThrouputratePre;ThrouputrateMain;ThrouputratePost;ScrapRatioPre;ScrapRatioMain;ScrapRatioPost;ReworkRatioPre;ReworkRatioMain;ReworkRatioPost;NAMain;NAPost;NAPre;QBRPre;QBRMain;QBRPost;MTBFPre;MTTRPre;MTBFMain;MTTRMain;MTBFPost;MTTRPost;OEEPre;OEEMain;OEEPost;Gewinn\n");
+            outputSS.Write("AvailabilityPre;AvailabilityMain;AvailabilityPost;EffectivenessPre;EffectivenessMain;EffectivenessPost;ThrouputratePre;ThrouputrateMain;ThrouputratePost;ScrapRatioPre;ScrapRatioMain;ScrapRatioPost;ReworkRatioPre;ReworkRatioMain;ReworkRatioPost;NAMain;NAPost;NAPre;QBRPre;QBRMain;QBRPost;MTBFPre;MTTRPre;MTBFMain;MTTRMain;MTBFPost;MTTRPost;OEEPre;OEEMain;OEEPost;Gewinn\n");
+            outputOSS.Write("AvailabilityPre;AvailabilityMain;AvailabilityPost;EffectivenessPre;EffectivenessMain;EffectivenessPost;ThrouputratePre;ThrouputrateMain;ThrouputratePost;ScrapRatioPre;ScrapRatioMain;ScrapRatioPost;ReworkRatioPre;ReworkRatioMain;ReworkRatioPost;NAMain;NAPost;NAPre;QBRPre;QBRMain;QBRPost;MTBFPre;MTTRPre;MTBFMain;MTTRMain;MTBFPost;MTTRPost;OEEPre;OEEMain;OEEPost;Gewinn\n");
 
             int i = 0;
-            int seed = 0;
+            
 
+            // Simulationsdurchläufe mit und ohne Smart Service
             while (i < inputData["Iterations"])
             {
-                (List<Job>, List<Job>) tupelListJobs = Jobgenerator.JobgeneratorS(inputData, seed+827);
+                (List<Job>, List<Job>) tupelListJobs = Jobgenerator.JobgeneratorS(inputData);
+                
 
-                //SS
-                ProcessControl pc = new ProcessControl(tupelListJobs.Item1, SmartService, inputData, new Simulation(randomSeed: seed));
+                int seed = random.Next();
 
-                (Dictionary<string, double>, double) tupelKPIProfit = pc.Simulate();
+                // Simulationsdurchlauf mit Smart Service
+                ProcessControl pcSS = new ProcessControl(tupelListJobs.Item1, SmartService, inputData, new Simulation(randomSeed: seed));
 
+                (Dictionary<string, double>, double, List<Job>, List<double>) tupelKPIProfitSS = pcSS.Simulate();
+                saveJobsSS.Add(tupelKPIProfitSS.Item3);
+                profitYearSS.Add(tupelKPIProfitSS.Item4);
                 // Gewinn für den geldwerten Vorteil speichern, damit der Durchschnitt errechnet werden kann
-                GewinnSS.Add(tupelKPIProfit.Item2);
+                GewinnSS.Add(tupelKPIProfitSS.Item2);
 
                 // KPIs und den Gewinn in CSV schreiben
-                foreach (var pair in tupelKPIProfit.Item1)
+                foreach (var pair in tupelKPIProfitSS.Item1)
                 {
-                    swKPISS.Write("{0};", pair.Value);
+                    outputSS.Write("{0};", pair.Value);
                     if (pair.Key == "OEEPost"){
-                        swKPISS.Write("{0}\n", tupelKPIProfit.Item2);
+                        outputSS.Write("{0}\n", tupelKPIProfitSS.Item2);
                     }
                 }
-                Console.WriteLine(seed);
-                // OSS
-                ProcessControl pc2 = new ProcessControl(tupelListJobs.Item2, OhneSmartService, inputData, new Simulation(randomSeed: seed));
+                
+                // Simulationsdurchlauf ohne Smart Service
+                ProcessControl pcOSS = new ProcessControl(tupelListJobs.Item2, withoutSmartService, inputData, new Simulation(randomSeed: seed));
 
-                (Dictionary<string, double>, double) tupelKPIProfit2 = pc2.Simulate();
-
+                (Dictionary<string, double>, double, List<Job>, List<double>) tupelKPIProfitOSS = pcOSS.Simulate();
+                saveJobsOSS.Add(tupelKPIProfitOSS.Item3);
+                profitYearOSS.Add(tupelKPIProfitOSS.Item4);
                 // Gewinn für den geldwerten Vorteil speichern, damit der Durchschnitt errechnet werden kann
-                GewinnOSS.Add(tupelKPIProfit2.Item2);
+                GewinnOSS.Add(tupelKPIProfitOSS.Item2);
 
                 //swGOSS.WriteLine(tupelKPIProfit.Item2);
-                foreach (var pair in tupelKPIProfit2.Item1)
+                foreach (var pair in tupelKPIProfitOSS.Item1)
                 {
-                    swKPIOSS.Write("{0};", pair.Value);
+                    outputOSS.Write("{0};", pair.Value);
                     if (pair.Key == "OEEPost")
                     {
-                        swKPIOSS.Write("{0}\n", tupelKPIProfit2.Item2);
+                        outputOSS.Write("{0}\n", tupelKPIProfitOSS.Item2);
                     }
                 }
 
+                if (i == 250) Console.WriteLine("Quater.");
+                if (i == 500) Console.WriteLine("Half time.");
+                if (i == 750) Console.WriteLine("Three quarters.");
+
                 i++;
-                seed += 345;
             }
 
-            swKPISS.Close();
-            swKPIOSS.Close();
+            outputSS.Close();
+            outputOSS.Close();
 
-            StreamWriter Vorteil = new StreamWriter("GeldwerterVorteil" + szenario[szenarioID] + ".csv");
+            StreamWriter monetaryBenefit = new StreamWriter("GeldwerterVorteil_" + szenario[szenarioID] + ".csv");
+            StreamWriter outputJobsSS = new StreamWriter("Output_Jobs_SS_" + szenario[szenarioID] + ".csv");
+            StreamWriter outputJobsOSS = new StreamWriter("Output_Jobs_OSS_" + szenario[szenarioID] + ".csv");
+            StreamWriter profitYearsSSCSV = new StreamWriter("Profit_SS_" + szenario[szenarioID] + ".csv");
+            StreamWriter profitYearsOSSCSV = new StreamWriter("Profit_OSS_" + szenario[szenarioID] + ".csv");
+
+            outputJobsSS.WriteLine("Job ID; Producttype ID; Quantity");
+            outputJobsOSS.WriteLine("Job ID; Producttype ID; Quantity");
+
+            foreach (List<Job> list in saveJobsSS)
+            {
+                foreach (Job job in list)
+                {
+                    outputJobsSS.Write(job.ID + ";");
+
+                    foreach (Producttype type in job.Producttype)
+                    {
+                        outputJobsSS.Write(type.ID + ";" + type.Quantity + "\n");
+                    }
+
+                }
+            }
+
+            foreach (List<Job> list in saveJobsOSS)
+            {
+                foreach (Job job in list)
+                {
+                    outputJobsOSS.Write(job.ID + ";");
+
+                    foreach (Producttype type in job.Producttype)
+                    {
+                        outputJobsOSS.Write(type.ID + ";" + type.Quantity + "\n");
+
+                    }
+
+                }
+            }
+
+            foreach (List<double> list in profitYearSS)
+            {
+                foreach (double d in list)
+                {
+                    profitYearsSSCSV.Write(d +";");
+
+                }
+                profitYearsSSCSV.WriteLine();
+            }
+
+            foreach (List<double> list in profitYearOSS)
+            {
+                foreach (double d in list)
+                {
+                    profitYearsOSSCSV.Write(d + ";");
+
+                }
+                profitYearsOSSCSV.WriteLine();
+            }
+            
+            profitYearsSSCSV.Close();
+            profitYearsOSSCSV.Close();
+            outputJobsSS.Close();
+            outputJobsOSS.Close();
 
             double averageSS = GewinnSS.Average();
             double averageOSS = GewinnOSS.Average();
             double profit = averageSS - averageOSS;
 
-            Vorteil.WriteLine("Gewinn Average SS: {0}", averageSS);
-            Vorteil.WriteLine("Gewinn Average OSS: {0}", averageOSS);
-            Vorteil.WriteLine("Geldwerter Vorteil: {0}", profit);
-            Vorteil.Close();
+            monetaryBenefit.WriteLine("Gewinn Average SS: {0}", averageSS);
+            monetaryBenefit.WriteLine("Gewinn Average OSS: {0}", averageOSS);
+            monetaryBenefit.WriteLine("Geldwerter Vorteil: {0}", profit);
+            monetaryBenefit.Close();
+            
 
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;

@@ -27,7 +27,7 @@ namespace ProduktionssystemSimulation
         Store producedProducts;
         Store productsToProduce;
         readonly Dictionary<string, double> inputData = new Dictionary<string, double>();
-        readonly private ArrayList finishedJobs = new ArrayList();
+        readonly private List<Job> finishedJobs = new List<Job>();
         readonly private Analysis analysis;
         readonly private SmartService smartService;
 
@@ -60,7 +60,7 @@ namespace ProduktionssystemSimulation
         {
             StoreGet getPipe;
             
-            foreach (Producttype position in job.Positions)
+            foreach (Producttype position in job.Producttype)
             {
                 producedProducts = new Store(env, (int)position.Quantity);
                 productsToProduce = new Store(env);
@@ -163,7 +163,7 @@ namespace ProduktionssystemSimulation
             while (true)
             {
                 // Ausfallwahrscheinlichkeit für M
-                TimeSpan failure = env.RandExponential(mtbfPost);
+                TimeSpan failure = env.RandExponential(mtbfPre);
                 //env.Log("{0}", failure);
                 //analysis.ADOTPre = analysis.ADOTPre.Add(failure);
                 yield return env.Timeout(failure);
@@ -180,7 +180,7 @@ namespace ProduktionssystemSimulation
         {
             while (true)
             {
-                TimeSpan failure = env.RandExponential(mtbfPost);
+                TimeSpan failure = env.RandExponential(mtbfMain);
                 //env.Log("{0}", failure);
                 //analysis.ADOTMain = analysis.ADOTMain.Add(failure);
                 yield return env.Timeout(failure);
@@ -210,7 +210,18 @@ namespace ProduktionssystemSimulation
             }
         }
 
-        public (Dictionary<string, double>,double) Simulate()
+        List<double> profitEachYear = new List<double>();
+        public IEnumerable<Event> GewinnJedesJahr(Simulation env)
+        {
+            while (true)
+            {
+                yield return env.Timeout(TimeSpan.FromHours(2016));
+                profitEachYear.Add(analysis.Profit(finishedJobs));
+                
+            }
+        }
+
+        public (Dictionary<string, double>,double, List<Job>, List<double>) Simulate()
         { 
             //Env.Log("======= Production Factory ========");
             
@@ -233,7 +244,7 @@ namespace ProduktionssystemSimulation
                 QueueLength = new TimeSeriesMonitor(env, name: "M3 Queue Length", collect: true),
             };
             
-            env.Process(JobInProcess(env, MPreprocess, MMainprocess, MPostprocess, jobs));
+            
             if (mtbfPre != TimeSpan.FromDays(0))
             {
                 env.Process(BreakMachinePreprocess(env));
@@ -248,7 +259,8 @@ namespace ProduktionssystemSimulation
             }
             
             finishedJobs.Clear();
-           
+            env.Process(GewinnJedesJahr(env));
+            env.Process(JobInProcess(env, MPreprocess, MMainprocess, MPostprocess, jobs));
             //Env.Log(MPreprocess.Utilization.Summarize());
             //Env.Log(MPreprocess.WaitingTime.Summarize());
             //Env.Log(MPreprocess.QueueLength.Summarize());
@@ -268,8 +280,9 @@ namespace ProduktionssystemSimulation
             //  .Build();
             //report.WriteHeader(); 
             env.Run(TimeSpan.FromHours(inputData["WorkingHours"]));
+         
             analysis.FinishedJobs = finishedJobs;
-            return (analysis.CalculateKPIs(), analysis.Profit());
+            return (analysis.CalculateKPIs(), analysis.Profit(finishedJobs), finishedJobs, profitEachYear);
             //FinishedJobs.ToList().ForEach(i => Console.WriteLine(i.ToString()));
         } 
     }
