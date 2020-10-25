@@ -145,16 +145,13 @@ namespace ProduktionssystemSimulation
             return KPIs;
         }
 
-        public double Profit(List<Job> finishedJobs)
+        public double Profit()
         {
             ManufactoringCosts = (InputData["WorkingHours"]-((ADOTPre.TotalMinutes+ ADOTMain.TotalMinutes+ ADOTPost.TotalMinutes) /60))*InputData["MachineHourCosts"]; 
-            foreach (Job j in finishedJobs)
+            foreach (Job j in FinishedJobs)
             {
                 foreach (Producttype p in j.Producttype)
                 {
-                    //Console.WriteLine("Menge: " +p.Quantity);
-                    //Console.WriteLine("Totale Menge: " + p.TotalProducedQuantity);
-                    //Console.WriteLine("Materialkosten pro Stück: " +  p.MaterialCost);
                     Revenue += (p.Quantity * p.Price);
                     MaterialCosts += (p.TotalProducedQuantity * p.MaterialCost);
                     foreach (Product pr in p.Products)
@@ -165,12 +162,7 @@ namespace ProduktionssystemSimulation
             }
             RepairCosts = ((ADOTPre.Add(ADOTMain).Add(ADOTPost)).TotalMinutes / 60) * InputData["HourlyWageFitter"];
             Costs = ManufactoringCosts + MaterialCosts + LabourCosts + RepairCosts;
-            //Console.WriteLine("Umsatz: " + Revenue);
-            //Console.WriteLine("Kosten: " + Costs);
-            //Console.WriteLine("ManufactoringCosts: " + ManufactoringCosts);
-            //Console.WriteLine("MaterialCosts: " + MaterialCosts);
-            //Console.WriteLine("RepairCosts: " + RepairCosts);
-            //Console.WriteLine("LabourCosts: " + LabourCosts);
+
             return Revenue-Costs;
         }
     }

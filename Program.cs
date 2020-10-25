@@ -31,8 +31,8 @@ namespace ProduktionssystemSimulation
             // Konfigurationsfile einlesen
             // es können unterschiedliche Szenarien abgespeichert werden und oben in dem Array angegeben werden
             // mit der ID kann das gewünschte Szenario ausgewählt werden
-            string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data_" + szenario[szenarioID] + ".txt";
-            //string curFile = @"F:\data.txt";
+            //string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data_" + szenario[szenarioID] + ".txt";
+            string curFile = @"F:\data.txt";
             if (File.Exists(curFile))
             {
                 Console.WriteLine("File exists.");
@@ -75,8 +75,6 @@ namespace ProduktionssystemSimulation
             List<double> GewinnOSS = new List<double>();
             List<List<Job>> saveJobsSS = new List<List<Job>>();
             List<List<Job>> saveJobsOSS = new List<List<Job>>();
-            List<List<double>> profitYearSS = new List<List<double>>();
-            List<List<double>> profitYearOSS = new List<List<double>>();
 
             // CSV header hinzufügen
             outputSS.Write("AvailabilityPre;AvailabilityMain;AvailabilityPost;EffectivenessPre;EffectivenessMain;EffectivenessPost;ThrouputratePre;ThrouputrateMain;ThrouputratePost;ScrapRatioPre;ScrapRatioMain;ScrapRatioPost;ReworkRatioPre;ReworkRatioMain;ReworkRatioPost;NAMain;NAPost;NAPre;QBRPre;QBRMain;QBRPost;MTBFPre;MTTRPre;MTBFMain;MTTRMain;MTBFPost;MTTRPost;OEEPre;OEEMain;OEEPost;Gewinn\n");
@@ -96,9 +94,8 @@ namespace ProduktionssystemSimulation
                 // Simulationsdurchlauf mit Smart Service
                 ProcessControl pcSS = new ProcessControl(tupelListJobs.Item1, SmartService, inputData, new Simulation(randomSeed: seed));
 
-                (Dictionary<string, double>, double, List<Job>, List<double>) tupelKPIProfitSS = pcSS.Simulate();
+                (Dictionary<string, double>, double, List<Job>) tupelKPIProfitSS = pcSS.Simulate();
                 saveJobsSS.Add(tupelKPIProfitSS.Item3);
-                profitYearSS.Add(tupelKPIProfitSS.Item4);
                 // Gewinn für den geldwerten Vorteil speichern, damit der Durchschnitt errechnet werden kann
                 GewinnSS.Add(tupelKPIProfitSS.Item2);
 
@@ -110,13 +107,13 @@ namespace ProduktionssystemSimulation
                         outputSS.Write("{0}\n", tupelKPIProfitSS.Item2);
                     }
                 }
+                Console.WriteLine(i);
                 
                 // Simulationsdurchlauf ohne Smart Service
                 ProcessControl pcOSS = new ProcessControl(tupelListJobs.Item2, withoutSmartService, inputData, new Simulation(randomSeed: seed));
 
-                (Dictionary<string, double>, double, List<Job>, List<double>) tupelKPIProfitOSS = pcOSS.Simulate();
+                (Dictionary<string, double>, double, List<Job>) tupelKPIProfitOSS = pcOSS.Simulate();
                 saveJobsOSS.Add(tupelKPIProfitOSS.Item3);
-                profitYearOSS.Add(tupelKPIProfitOSS.Item4);
                 // Gewinn für den geldwerten Vorteil speichern, damit der Durchschnitt errechnet werden kann
                 GewinnOSS.Add(tupelKPIProfitOSS.Item2);
 
@@ -143,8 +140,6 @@ namespace ProduktionssystemSimulation
             StreamWriter monetaryBenefit = new StreamWriter("GeldwerterVorteil_" + szenario[szenarioID] + ".csv");
             StreamWriter outputJobsSS = new StreamWriter("Output_Jobs_SS_" + szenario[szenarioID] + ".csv");
             StreamWriter outputJobsOSS = new StreamWriter("Output_Jobs_OSS_" + szenario[szenarioID] + ".csv");
-            StreamWriter profitYearsSSCSV = new StreamWriter("Profit_SS_" + szenario[szenarioID] + ".csv");
-            StreamWriter profitYearsOSSCSV = new StreamWriter("Profit_OSS_" + szenario[szenarioID] + ".csv");
 
             outputJobsSS.WriteLine("Job ID; Producttype ID; Quantity");
             outputJobsOSS.WriteLine("Job ID; Producttype ID; Quantity");
@@ -178,28 +173,6 @@ namespace ProduktionssystemSimulation
                 }
             }
 
-            foreach (List<double> list in profitYearSS)
-            {
-                foreach (double d in list)
-                {
-                    profitYearsSSCSV.Write(d +";");
-
-                }
-                profitYearsSSCSV.WriteLine();
-            }
-
-            foreach (List<double> list in profitYearOSS)
-            {
-                foreach (double d in list)
-                {
-                    profitYearsOSSCSV.Write(d + ";");
-
-                }
-                profitYearsOSSCSV.WriteLine();
-            }
-            
-            profitYearsSSCSV.Close();
-            profitYearsOSSCSV.Close();
             outputJobsSS.Close();
             outputJobsOSS.Close();
 

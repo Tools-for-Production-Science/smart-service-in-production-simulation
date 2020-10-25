@@ -210,18 +210,9 @@ namespace ProduktionssystemSimulation
             }
         }
 
-        List<double> profitEachYear = new List<double>();
-        public IEnumerable<Event> GewinnJedesJahr(Simulation env)
-        {
-            while (true)
-            {
-                yield return env.Timeout(TimeSpan.FromHours(2016));
-                profitEachYear.Add(analysis.Profit(finishedJobs));
-                
-            }
-        }
+      
 
-        public (Dictionary<string, double>,double, List<Job>, List<double>) Simulate()
+        public (Dictionary<string, double>,double, List<Job>) Simulate()
         { 
             //Env.Log("======= Production Factory ========");
             
@@ -259,7 +250,6 @@ namespace ProduktionssystemSimulation
             }
             
             finishedJobs.Clear();
-            env.Process(GewinnJedesJahr(env));
             env.Process(JobInProcess(env, MPreprocess, MMainprocess, MPostprocess, jobs));
             //Env.Log(MPreprocess.Utilization.Summarize());
             //Env.Log(MPreprocess.WaitingTime.Summarize());
@@ -282,7 +272,7 @@ namespace ProduktionssystemSimulation
             env.Run(TimeSpan.FromHours(inputData["WorkingHours"]));
          
             analysis.FinishedJobs = finishedJobs;
-            return (analysis.CalculateKPIs(), analysis.Profit(finishedJobs), finishedJobs, profitEachYear);
+            return (analysis.CalculateKPIs(), analysis.Profit(), finishedJobs);
             //FinishedJobs.ToList().ForEach(i => Console.WriteLine(i.ToString()));
         } 
     }
