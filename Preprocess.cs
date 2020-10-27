@@ -36,7 +36,6 @@ namespace ProduktionssystemSimulation
             if (env.ActiveProcess.HandleFault())
             {
                 pc.brokenPre = true;
-                //Env.Log("Break Machine in Preprocess");
 
                 TimeSpan downtime = env.RandLogNormal2(TimeSpan.FromDays(downtimePreMean), TimeSpan.FromDays(downtimePreSigma));
 

@@ -4,8 +4,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using SimSharp;
 
@@ -14,7 +12,7 @@ namespace ProduktionssystemSimulation
     class Program
     {
         readonly static String[] szenario = new String[] { "alle", "Scrap_Rework", "MTBF_Downtime" };
-        readonly static int szenarioID = 1;
+        readonly static int szenarioID = 2;
         private static SmartService SmartService;
         readonly static Dictionary<string, double> inputData = new Dictionary<string, double>();
         // Simulationsumgegbung wird hier schon erzeugt, da diese für die festlegung der Produktmenge benötigt wird
@@ -31,8 +29,8 @@ namespace ProduktionssystemSimulation
             // Konfigurationsfile einlesen
             // es können unterschiedliche Szenarien abgespeichert werden und oben in dem Array angegeben werden
             // mit der ID kann das gewünschte Szenario ausgewählt werden
-            //string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data_" + szenario[szenarioID] + ".txt";
-            string curFile = @"F:\data_" + szenario[szenarioID] + ".txt";
+            string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data_" + szenario[szenarioID] + ".txt";
+            //string curFile = @"F:\data_" + szenario[szenarioID] + ".txt";
             if (File.Exists(curFile))
             {
                 Console.WriteLine("File exists.");
@@ -53,7 +51,6 @@ namespace ProduktionssystemSimulation
                 }
             }
 
-            Console.WriteLine(inputData["MTBFPost"]);
             SmartService = new SmartService(
                 inputData["Scrap"],
                 inputData["MTBFMean"],
@@ -72,7 +69,6 @@ namespace ProduktionssystemSimulation
 
             StreamWriter outputSS = new StreamWriter("Output_SS_"+szenario[szenarioID]+".csv");
             StreamWriter outputOSS = new StreamWriter("Output_OSS_" + szenario[szenarioID] + ".csv");
-            StreamWriter outputNumberFailur = new StreamWriter("NumberOfFailurePost.csv");
 
             List<double> GewinnSS = new List<double>();
             List<double> GewinnOSS = new List<double>();
@@ -111,8 +107,7 @@ namespace ProduktionssystemSimulation
                         outputSS.Write("{0}\n", tupelKPIProfitSS.Item2);
                     }
                 }
-                Console.WriteLine(i);
-                outputNumberFailur.WriteLine("ohne SS: ");
+
                 // Simulationsdurchlauf ohne Smart Service
                 ProcessControl pcOSS = new ProcessControl(tupelListJobs.Item2, withoutSmartService, inputData, new Simulation(randomSeed: seed));
 
@@ -136,6 +131,7 @@ namespace ProduktionssystemSimulation
                 if (i == 500) Console.WriteLine("Half time.");
                 if (i == 750) Console.WriteLine("Three quarters.");
 
+                Console.WriteLine(i);
                 i++;
             }
 

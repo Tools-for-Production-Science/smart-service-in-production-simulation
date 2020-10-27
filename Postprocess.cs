@@ -37,7 +37,6 @@ namespace ProduktionssystemSimulation
             if (env.ActiveProcess.HandleFault())
             {
                 pc.brokenPost = true;
-                env.Log("Break Machine Postprocess");
 
                 TimeSpan downtime = env.RandLogNormal2(TimeSpan.FromDays(downtimePostMean), TimeSpan.FromDays(downtimePostSigma));
 
