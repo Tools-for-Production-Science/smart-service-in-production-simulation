@@ -154,15 +154,20 @@ namespace ProduktionssystemSimulation
                 yield return env.Timeout(failure);
                 if (processPre != null && !brokenPre)
                 {
-                    while (!processPre.IsOk || !processPre.IsAlive)
+                    do
                     {
-                        yield return env.Timeout(TimeSpan.FromSeconds(1));
                         if (processPre.IsOk && processPre.IsAlive)
                         {
-                            analysis.NumberOfFailureMain = analysis.NumberOfFailurePre + 1;
+                            analysis.NumberOfFailurePre = analysis.NumberOfFailurePre + 1;
                             processPre.Interrupt();
+                            break;
                         }
-                    }
+                        else
+                        {
+                            yield return env.Timeout(TimeSpan.FromSeconds(1));
+                            continue;
+                        }
+                    } while (true);
                 }
             }
         }
@@ -175,15 +180,19 @@ namespace ProduktionssystemSimulation
                 yield return env.Timeout(failure);
                 if (processMain != null && !brokenMain)
                 {
-                    while (!processMain.IsOk || !processMain.IsAlive)
+                    do
                     {
-                        yield return env.Timeout(TimeSpan.FromSeconds(1));
                         if (processMain.IsOk && processMain.IsAlive)
                         {
                             analysis.NumberOfFailureMain = analysis.NumberOfFailureMain + 1;
                             processMain.Interrupt();
+                            break;
+                        }else
+                        {
+                            yield return env.Timeout(TimeSpan.FromSeconds(1));
+                            continue;
                         }
-                    }
+                    } while(true);
                 }
             }
         }
@@ -197,15 +206,20 @@ namespace ProduktionssystemSimulation
                
                 if (processPost != null && !brokenPost )
                 {
-                    while (!processPost.IsOk || !processPost.IsAlive)
+                    do
                     {
-                        yield return env.Timeout(TimeSpan.FromSeconds(1));
                         if (processPost.IsOk && processPost.IsAlive)
                         {
                             analysis.NumberOfFailurePost = analysis.NumberOfFailurePost + 1;
                             processPost.Interrupt();
+                            break;
                         }
-                    }
+                        else
+                        {
+                            yield return env.Timeout(TimeSpan.FromSeconds(1));
+                            continue;
+                        }
+                    } while (true);
                 }
             }
         }

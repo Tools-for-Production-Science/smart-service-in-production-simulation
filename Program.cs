@@ -12,7 +12,7 @@ namespace ProduktionssystemSimulation
     class Program
     {
         readonly static String[] szenario = new String[] { "alle", "Scrap_Rework", "MTBF_Downtime" };
-        readonly static int szenarioID = 2;
+        readonly static int szenarioID = 1;
         private static SmartService SmartService;
         readonly static Dictionary<string, double> inputData = new Dictionary<string, double>();
         // Simulationsumgegbung wird hier schon erzeugt, da diese für die festlegung der Produktmenge benötigt wird
@@ -29,8 +29,8 @@ namespace ProduktionssystemSimulation
             // Konfigurationsfile einlesen
             // es können unterschiedliche Szenarien abgespeichert werden und oben in dem Array angegeben werden
             // mit der ID kann das gewünschte Szenario ausgewählt werden
-            string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data_" + szenario[szenarioID] + ".txt";
-            //string curFile = @"F:\data_" + szenario[szenarioID] + ".txt";
+            //string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data_" + szenario[szenarioID] + ".txt";
+            string curFile = @"F:\data_" + szenario[szenarioID] + ".txt";
             if (File.Exists(curFile))
             {
                 Console.WriteLine("File exists.");
