@@ -37,7 +37,7 @@ namespace ProduktionssystemSimulation
             if (env.ActiveProcess.HandleFault())
             {
                 pc.brokenPost = true;
-                //Env.Log("Break Machine Postprocess");
+                env.Log("Break Machine Postprocess");
 
                 TimeSpan downtime = env.RandLogNormal2(TimeSpan.FromDays(downtimePostMean), TimeSpan.FromDays(downtimePostSigma));
 
@@ -45,14 +45,14 @@ namespace ProduktionssystemSimulation
                 analysis.ADOTPost = analysis.ADOTPost.Add(downtime);
                 product.Broken = true;
                 yield return env.Timeout(downtime);
-                //Env.Log("Machine in Postprocess repaired");
                 pc.brokenPost = false;
             }
+
             // Maschine wieder frei geben, sobald das Produkt fertig produziert ist.
             machine.Release(req);
-            //Env.Log("{0} ProductNo {1}: Machine Postprocess is finished", Env.Now, product.ID);
         }
 
+       
        
        
     }

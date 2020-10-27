@@ -23,8 +23,6 @@ namespace ProduktionssystemSimulation
 
         public IEnumerable<Event> ProductionStep(Resource machine, Request req, Product product)
         {
-            //Env.Log("{0} ProductNo {1}: Machine Preprocess is in production", Env.Now, product.ID);
-
             TimeSpan productionTime = env.RandLogNormal2(product.ProductionTimePreMean, product.ProductionTimePreSigma);
 
             // Für die KPI berechnung, die gesamt Zeit in der die Maschine läuft abspeichern.
@@ -42,21 +40,17 @@ namespace ProduktionssystemSimulation
 
                 TimeSpan downtime = env.RandLogNormal2(TimeSpan.FromDays(downtimePreMean), TimeSpan.FromDays(downtimePreSigma));
 
-                //Console.WriteLine("PRE: "+Downtime.TotalHours);
-
                 // Ausfallzeit der Maschine für die Berechnung der KPI berechnen.
                 analysis.ADOTPre = analysis.ADOTPre.Add(downtime);
 
                 product.Broken = true;
 
                 yield return env.Timeout(downtime);
-                //Env.Log("Machine in Preprocess repaired");
                 pc.brokenPre = false;
             }
 
             // Maschine wieder frei geben, sobald das Produkt fertig produziert ist.
             machine.Release(req);
-            //Env.Log("{0} ProductNo {1}: Machine Preprocess is finished", Env.Now, product.ID);
         }
     }
 }

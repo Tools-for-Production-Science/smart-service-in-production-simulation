@@ -32,7 +32,7 @@ namespace ProduktionssystemSimulation
             // es können unterschiedliche Szenarien abgespeichert werden und oben in dem Array angegeben werden
             // mit der ID kann das gewünschte Szenario ausgewählt werden
             //string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data_" + szenario[szenarioID] + ".txt";
-            string curFile = @"F:\data.txt";
+            string curFile = @"F:\data_" + szenario[szenarioID] + ".txt";
             if (File.Exists(curFile))
             {
                 Console.WriteLine("File exists.");
@@ -52,7 +52,8 @@ namespace ProduktionssystemSimulation
                     inputData.Add(keyvalue[0], double.Parse(keyvalue[1], CultureInfo.InvariantCulture));
                 }
             }
-           
+
+            Console.WriteLine(inputData["MTBFPost"]);
             SmartService = new SmartService(
                 inputData["Scrap"],
                 inputData["MTBFMean"],
@@ -71,6 +72,8 @@ namespace ProduktionssystemSimulation
 
             StreamWriter outputSS = new StreamWriter("Output_SS_"+szenario[szenarioID]+".csv");
             StreamWriter outputOSS = new StreamWriter("Output_OSS_" + szenario[szenarioID] + ".csv");
+            StreamWriter outputNumberFailur = new StreamWriter("NumberOfFailurePost.csv");
+
             List<double> GewinnSS = new List<double>();
             List<double> GewinnOSS = new List<double>();
             List<List<Job>> saveJobsSS = new List<List<Job>>();
@@ -96,6 +99,7 @@ namespace ProduktionssystemSimulation
 
                 (Dictionary<string, double>, double, List<Job>) tupelKPIProfitSS = pcSS.Simulate();
                 saveJobsSS.Add(tupelKPIProfitSS.Item3);
+
                 // Gewinn für den geldwerten Vorteil speichern, damit der Durchschnitt errechnet werden kann
                 GewinnSS.Add(tupelKPIProfitSS.Item2);
 
@@ -108,12 +112,13 @@ namespace ProduktionssystemSimulation
                     }
                 }
                 Console.WriteLine(i);
-                
+                outputNumberFailur.WriteLine("ohne SS: ");
                 // Simulationsdurchlauf ohne Smart Service
                 ProcessControl pcOSS = new ProcessControl(tupelListJobs.Item2, withoutSmartService, inputData, new Simulation(randomSeed: seed));
 
                 (Dictionary<string, double>, double, List<Job>) tupelKPIProfitOSS = pcOSS.Simulate();
                 saveJobsOSS.Add(tupelKPIProfitOSS.Item3);
+
                 // Gewinn für den geldwerten Vorteil speichern, damit der Durchschnitt errechnet werden kann
                 GewinnOSS.Add(tupelKPIProfitOSS.Item2);
 

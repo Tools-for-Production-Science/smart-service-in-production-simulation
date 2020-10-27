@@ -25,7 +25,6 @@ namespace ProduktionssystemSimulation
 
         public IEnumerable<Event> ProductionStep(Resource machine, Request req, Product product)
         {
-            //Env.Log("{0} ProductNo {1}: Machine Mainprocess is in production", Env.Now, product.ID);
             TimeSpan ProductionTime = env.RandNormalPositive(product.ProductionTimeMainMean, product.ProductionTimeMainSigma);
 
             // Für die KPI berechnung, die gesamt Zeit in der die Maschine läuft abspeichern.
@@ -39,24 +38,18 @@ namespace ProduktionssystemSimulation
             if (env.ActiveProcess.HandleFault())
             {
                 pc.brokenMain = true;
-                //Env.Log("Break Machine in Mainprocess");
 
                 TimeSpan downtime = TimeSpan.FromDays(env.RandLogNormal2(downtimeMainMean* (1  - smartService.DowntimeMean),downtimeMainSigma * (1 - smartService.DowntimeSigma)) );
-
-                //Console.WriteLine("Davor: " + analysis.ADOTMain.TotalMinutes);
-
                 // Ausfallzeit der Maschine für die Berechnung der KPI berechnen.
                 analysis.ADOTMain = analysis.ADOTMain.Add(downtime);
 
                 product.Broken = true;
                 yield return env.Timeout(downtime);
-                //Env.Log("Machine in Mainprocess repaired");
                 pc.brokenMain = false;
             }
 
             // Maschine wieder frei geben, sobald das Produkt fertig produziert ist.
             machine.Release(req);
-            //Env.Log("{0} ProductNo {1}: Machine Mainprocess is finished", Env.Now, product.ID);
         }
 
         
