@@ -147,7 +147,8 @@ namespace ProduktionssystemSimulation
 
         public double Profit()
         {
-            ManufactoringCosts = (InputData["WorkingHours"]-((ADOTPre.TotalMinutes+ ADOTMain.TotalMinutes+ ADOTPost.TotalMinutes) /60))*InputData["MachineHourCosts"]; 
+            ManufactoringCosts = (3*InputData["WorkingHours"]-(ADOTPre.TotalHours+ ADOTMain.TotalHours + ADOTPost.TotalHours))*InputData["MachineHourCosts"] + (3*InputData["WorkingHours"] - (ADOTPre.TotalHours + ADOTMain.TotalHours + ADOTPost.TotalHours + APTPre.TotalHours + APTMain.TotalHours + APTPost.TotalHours)) * InputData["MachineStandHourCosts"];
+            Console.WriteLine(ManufactoringCosts);
             foreach (Job j in FinishedJobs)
             {
                 foreach (Producttype p in j.Producttype)
