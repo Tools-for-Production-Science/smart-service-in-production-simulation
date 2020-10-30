@@ -10,10 +10,9 @@ namespace ProduktionssystemSimulation
     public static class Jobgenerator
     {  
         private static Simulation env;
-        //static StreamWriter checkJobs = new StreamWriter("checkJobs.csv");
         static int seed = 42;
         // Generiert die benötigenten Aufträge und speichert diese in einer Liste ab
-        public static (List<Job>, List<Job>) JobgeneratorS(Dictionary<string, double> inputData)
+        public static (List<Job>, List<Job>) GenerateJobs(Dictionary<string, double> inputData)
         {
             List<Job> Jobs1 = new List<Job>();
             List<Job> Jobs2 = new List<Job>();
@@ -34,7 +33,7 @@ namespace ProduktionssystemSimulation
                     {
                         ProductQuantity = (int)env.RandLogNormal2(inputData[$"QuantityMean{t}"], inputData[$"QuantitySigma{t}"]);
                     } while (ProductQuantity <= 0);
-                    //checkJobs.WriteLine(ProductQuantity);
+
                     double MaterialCost = inputData[$"MaterialCostsPerProductMean{t}"];
 
                     for (int p = 1; p <= ProductQuantity; p++)

@@ -40,7 +40,7 @@ namespace ProduktionssystemSimulation
             mainprocess = new Mainprocess(this, env, smartService, inputData["DowntimeMainMean"], inputData["DowntimeMainSigma"], analysis);
             postprocess = new Postprocess(this, env, inputData["DowntimePostMean"], inputData["DowntimePostSigma"], analysis);
             mtbfPre = TimeSpan.FromDays(inputData["MTBFPre"]);
-            mtbfMain = TimeSpan.FromDays(inputData["MTBFMain"] * (1 + smartService.MTBFMean));
+            mtbfMain = TimeSpan.FromDays(inputData["MTBFMain"] * (1 + smartService.SSEffectMTBFMean));
             mtbfPost = TimeSpan.FromDays(inputData["MTBFPost"]);
             this.inputData = inputData;
             this.env = env;
@@ -66,11 +66,11 @@ namespace ProduktionssystemSimulation
                 position.TotalProducedQuantity = 0;
                 //SetUp
                 TimeSpan setupPre = env.RandLogNormal2(position.SetupMean, position.SetupSigma);
-                analysis.AUSTPre = analysis.AUSTPre.Add(setupPre); 
+                analysis.SetupTimePre = analysis.SetupTimePre.Add(setupPre); 
                 TimeSpan setupMain = env.RandLogNormal2(position.SetupMean, position.SetupSigma);
-                analysis.AUSTMain = analysis.AUSTMain.Add(setupMain);
+                analysis.SetupTimeMain = analysis.SetupTimeMain.Add(setupMain);
                 TimeSpan setupPost = env.RandLogNormal2(position.SetupMean, position.SetupSigma);
-                analysis.AUSTPost = analysis.AUSTPost.Add(setupPost);
+                analysis.SetupTimePost = analysis.SetupTimePost.Add(setupPost);
                 yield return env.Timeout(setupPre) & env.Timeout(setupMain) & env.Timeout(setupPost);
                 foreach (Product product in position.Products)
                 {

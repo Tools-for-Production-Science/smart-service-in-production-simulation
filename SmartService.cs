@@ -2,25 +2,25 @@
 {
     public class SmartService
     {
-        private double _downtimeMean = 0;
-        private double _mTBFMean = 0;
-        private double _scrap = 0;
-        private double _rework = 0;
-        private double _downtimeSigma = 0;
+        private double _ssEffectDowntimeMean = 0;
+        private double _ssEffectMTBFMean = 0;
+        private double _ssEffectScrap = 0;
+        private double _ssEffectRework = 0;
+        private double _ssEffectDowntimeSigma = 0;
 
         public SmartService(double scrap, double mTBFMean, double downtimeMean, double downtimeSigma, double rework)
         {
-            Scrap = scrap;
-            MTBFMean = mTBFMean;
-            DowntimeMean = downtimeMean;
-            Rework = rework;
-            DowntimeSigma = downtimeSigma;
+            SSEffectScrap = scrap;
+            SSEffectMTBFMean = mTBFMean;
+            SSEffectDowntimeMean = downtimeMean;
+            SSEffectRework = rework;
+            SSEffectDowntimeSigma = downtimeSigma;
         }
         
-        public double DowntimeMean { get => _downtimeMean; set => _downtimeMean = value; }
-        public double Scrap { get => _scrap; set => _scrap = value; }
-        public double MTBFMean { get => _mTBFMean; set => _mTBFMean = value; }
-        public double Rework { get => _rework; set => _rework = value; }
-        public double DowntimeSigma { get => _downtimeSigma; set => _downtimeSigma = value; }
+        public double SSEffectDowntimeMean { get => _ssEffectDowntimeMean; set => _ssEffectDowntimeMean = value; }
+        public double SSEffectScrap { get => _ssEffectScrap; set => _ssEffectScrap = value; }
+        public double SSEffectMTBFMean { get => _ssEffectMTBFMean; set => _ssEffectMTBFMean = value; }
+        public double SSEffectRework { get => _ssEffectRework; set => _ssEffectRework = value; }
+        public double SSEffectDowntimeSigma { get => _ssEffectDowntimeSigma; set => _ssEffectDowntimeSigma = value; }
     }
 }

@@ -6,12 +6,12 @@ namespace ProduktionssystemSimulation
 {
     class Mainprocess
     {
-        readonly ProcessControl pc;
-        readonly Simulation env;
-        readonly SmartService smartService;
-        readonly Analysis analysis;
-        readonly double downtimeMainMean;
-        readonly double downtimeMainSigma;
+        readonly private ProcessControl pc;
+        readonly private Simulation env;
+        readonly private SmartService smartService;
+        readonly private Analysis analysis;
+        readonly private double downtimeMainMean;
+        readonly private double downtimeMainSigma;
 
         public Mainprocess(ProcessControl pc, Simulation env, SmartService smartService, double downtimeMainMean, double downtimeMainSigma, Analysis analysis)
         {
@@ -28,7 +28,7 @@ namespace ProduktionssystemSimulation
             TimeSpan ProductionTime = env.RandNormalPositive(product.ProductionTimeMainMean, product.ProductionTimeMainSigma);
 
             // Für die KPI berechnung, die gesamt Zeit in der die Maschine läuft abspeichern.
-            analysis.APTMain = analysis.APTMain.Add(ProductionTime);
+            analysis.MachineWorkingTimeMain = analysis.MachineWorkingTimeMain.Add(ProductionTime);
 
             yield return env.Timeout(ProductionTime);
 
@@ -39,9 +39,9 @@ namespace ProduktionssystemSimulation
             {
                 pc.brokenMain = true;
 
-                TimeSpan downtime = TimeSpan.FromDays(env.RandLogNormal2(downtimeMainMean* (1  - smartService.DowntimeMean),downtimeMainSigma * (1 - smartService.DowntimeSigma)) );
+                TimeSpan downtime = TimeSpan.FromDays(env.RandLogNormal2(downtimeMainMean* (1  - smartService.SSEffectDowntimeMean),downtimeMainSigma * (1 - smartService.SSEffectDowntimeSigma)) );
                 // Ausfallzeit der Maschine für die Berechnung der KPI berechnen.
-                analysis.ADOTMain = analysis.ADOTMain.Add(downtime);
+                analysis.DowntimeMain = analysis.DowntimeMain.Add(downtime);
 
                 product.Broken = true;
                 yield return env.Timeout(downtime);
