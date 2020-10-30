@@ -73,10 +73,14 @@ namespace ProduktionssystemSimulation
                         inputData[$"ReworkRatioPreMean{t}"],
                         inputData[$"ReworkRatioMainMean{t}"],
                         inputData[$"ReworkRatioPostMean{t}"],
-                        TimeSpan.FromDays(inputData[$"SetupTimeMean{t}"]),
-                        TimeSpan.FromDays(inputData[$"SetupTimeSigma{t}"]),
+                        TimeSpan.FromDays(inputData[$"SetupTimePreMean{t}"]),
+                        TimeSpan.FromDays(inputData[$"SetupTimePreSigma{t}"]),
                         MaterialCost,
-                        inputData[$"Price{t}"]
+                        inputData[$"Price{t}"],
+                        TimeSpan.FromDays(inputData[$"SetupTimeMainMean{t}"]),
+                        TimeSpan.FromDays(inputData[$"SetupTimeMainSigma{t}"]),
+                        TimeSpan.FromDays(inputData[$"SetupTimePostMean{t}"]),
+                        TimeSpan.FromDays(inputData[$"SetupTimePostSigma{t}"])
                         ));
 
                     Producttype2.Add(new Producttype(
@@ -89,10 +93,14 @@ namespace ProduktionssystemSimulation
                         inputData[$"ReworkRatioPreMean{t}"],
                         inputData[$"ReworkRatioMainMean{t}"],
                         inputData[$"ReworkRatioPostMean{t}"],
-                        TimeSpan.FromDays(inputData[$"SetupTimeMean{t}"]),
-                        TimeSpan.FromDays(inputData[$"SetupTimeSigma{t}"]),
+                        TimeSpan.FromDays(inputData[$"SetupTimePreMean{t}"]),
+                        TimeSpan.FromDays(inputData[$"SetupTimePreSigma{t}"]),
                         MaterialCost,
-                        inputData[$"Price{t}"]
+                        inputData[$"Price{t}"],
+                        TimeSpan.FromDays(inputData[$"SetupTimeMainMean{t}"]),
+                        TimeSpan.FromDays(inputData[$"SetupTimeMainSigma{t}"]),
+                        TimeSpan.FromDays(inputData[$"SetupTimePostMean{t}"]),
+                        TimeSpan.FromDays(inputData[$"SetupTimePostSigma{t}"])
                         ));
                 }
 

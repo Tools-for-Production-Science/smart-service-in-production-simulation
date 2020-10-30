@@ -12,7 +12,7 @@ namespace ProduktionssystemSimulation
     class Program
     {
         readonly static String[] szenario = new String[] { "alle", "Scrap_Rework", "MTBF_Downtime", "Scrap_Rework_OneYear", "Scrap_Rework_ThreeYears", "Scrap_Rework_FiveYears" };
-        static int szenarioID = 2;
+        static int szenarioID = 0;
         private static SmartService SmartService;
         readonly static Dictionary<string, double> inputData = new Dictionary<string, double>();
         // Simulationsumgegbung wird hier schon erzeugt, da diese für die festlegung der Produktmenge benötigt wird
@@ -71,8 +71,8 @@ namespace ProduktionssystemSimulation
                 0
             );
 
-            StreamWriter outputSS = new StreamWriter("Output_SS_"+szenario[szenarioID]+ "_SevenYear.csv");
-            StreamWriter outputOSS = new StreamWriter("Output_OSS_" + szenario[szenarioID] + "_SevenYear.csv");
+            StreamWriter outputSS = new StreamWriter("Output_SS_"+szenario[szenarioID]+ ".csv");
+            StreamWriter outputOSS = new StreamWriter("Output_OSS_" + szenario[szenarioID] + ".csv");
 
             List<double> GewinnSS = new List<double>();
             List<double> GewinnOSS = new List<double>();
@@ -142,9 +142,9 @@ namespace ProduktionssystemSimulation
             outputSS.Close();
             outputOSS.Close();
 
-            StreamWriter monetaryBenefit = new StreamWriter("GeldwerterVorteil_" + szenario[szenarioID] + "_SevenYear.csv");
-            StreamWriter outputJobsSS = new StreamWriter("Output_Jobs_SS_" + szenario[szenarioID] + "_SevenYear.csv");
-            StreamWriter outputJobsOSS = new StreamWriter("Output_Jobs_OSS_" + szenario[szenarioID] + "_SevenYear.csv");
+            StreamWriter monetaryBenefit = new StreamWriter("GeldwerterVorteil_" + szenario[szenarioID] + ".csv");
+            StreamWriter outputJobsSS = new StreamWriter("Output_Jobs_SS_" + szenario[szenarioID] + ".csv");
+            StreamWriter outputJobsOSS = new StreamWriter("Output_Jobs_OSS_" + szenario[szenarioID] + ".csv");
 
             outputJobsSS.WriteLine("Job ID; Producttype ID; Quantity");
             outputJobsOSS.WriteLine("Job ID; Producttype ID; Quantity");

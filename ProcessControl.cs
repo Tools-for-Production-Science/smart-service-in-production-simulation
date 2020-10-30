@@ -65,11 +65,11 @@ namespace ProduktionssystemSimulation
                 producedQuanity = 0;
                 position.TotalProducedQuantity = 0;
                 //SetUp
-                TimeSpan setupPre = env.RandLogNormal2(position.SetupMean, position.SetupSigma);
+                TimeSpan setupPre = env.RandLogNormal2(position.SetupPreMean, position.SetupPreSigma);
                 analysis.SetupTimePre = analysis.SetupTimePre.Add(setupPre); 
-                TimeSpan setupMain = env.RandLogNormal2(position.SetupMean, position.SetupSigma);
+                TimeSpan setupMain = env.RandLogNormal2(position.SetupMainMean, position.SetupMainSigma);
                 analysis.SetupTimeMain = analysis.SetupTimeMain.Add(setupMain);
-                TimeSpan setupPost = env.RandLogNormal2(position.SetupMean, position.SetupSigma);
+                TimeSpan setupPost = env.RandLogNormal2(position.SetupPostMean, position.SetupPostSigma);
                 analysis.SetupTimePost = analysis.SetupTimePost.Add(setupPost);
                 yield return env.Timeout(setupPre) & env.Timeout(setupMain) & env.Timeout(setupPost);
                 foreach (Product product in position.Products)

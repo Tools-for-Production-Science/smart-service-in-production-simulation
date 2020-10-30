@@ -7,8 +7,12 @@ namespace ProduktionssystemSimulation
     public class Producttype
     {
         private List<Product> _products;
-        private TimeSpan _setupMean;
-        private TimeSpan _setupSigma;
+        private TimeSpan _setupPreMean;
+        private TimeSpan _setupPreSigma;
+        private TimeSpan _setupMainMean;
+        private TimeSpan _setupMainSigma;
+        private TimeSpan _setupPostMean;
+        private TimeSpan _setupPostSigma;
         private double _scrapPreMean;
         private double _scrapMainMean;
         private double _scrapPostMean;
@@ -21,7 +25,7 @@ namespace ProduktionssystemSimulation
         private int _totalProducedQuantity;
         private int _id;
 
-        public Producttype(int quanity, int id, List<Product> products, double scrapPreMean, double scrapMainMean, double scrapPostMean, double reworkPreMean, double reworkMainMean, double reworkPostMean, TimeSpan setupMean, TimeSpan setupSigma, double materialCost, double price)
+        public Producttype(int quanity, int id, List<Product> products, double scrapPreMean, double scrapMainMean, double scrapPostMean, double reworkPreMean, double reworkMainMean, double reworkPostMean, TimeSpan setupMean, TimeSpan setupSigma, double materialCost, double price, TimeSpan setupMainMean, TimeSpan setupMainSigma, TimeSpan setupPostMean, TimeSpan setupPostSigma)
         {
             Quantity = quanity;
             ID = id;
@@ -32,10 +36,14 @@ namespace ProduktionssystemSimulation
             ReworkPreMean = reworkPreMean;
             ReworkMainMean = reworkMainMean;
             ReworkPostMean = reworkPostMean;
-            SetupMean = setupMean;
-            SetupSigma = setupSigma;
+            SetupPreMean = setupMean;
+            SetupPreSigma = setupSigma;
             MaterialCost = materialCost;
             Price = price;
+            SetupMainMean = setupMainMean;
+            SetupMainSigma = setupMainSigma;
+            SetupPostMean = setupPostMean;
+            SetupPostSigma = setupPostSigma;
         }
 
         public int Quantity { get => _quantity; set => _quantity = value; }
@@ -47,11 +55,15 @@ namespace ProduktionssystemSimulation
         public double ReworkPreMean { get => _reworkPreMean; set => _reworkPreMean = value; }
         public double ReworkMainMean { get => _reworkMainMean; set => _reworkMainMean = value; }
         public double ReworkPostMean { get => _reworkPostMean; set => _reworkPostMean = value; }
-        public TimeSpan SetupMean { get => _setupMean; set => _setupMean = value; }
-        public TimeSpan SetupSigma { get => _setupSigma; set => _setupSigma = value; }
+        public TimeSpan SetupPreMean { get => _setupPreMean; set => _setupPreMean = value; }
+        public TimeSpan SetupPreSigma { get => _setupPreSigma; set => _setupPreSigma = value; }
         public double MaterialCost { get => _materialCost; set => _materialCost = value; }
         public double Price { get => _price; set => _price = value; }
         public int TotalProducedQuantity { get => _totalProducedQuantity; set => _totalProducedQuantity = value; }
+        public TimeSpan SetupMainMean { get => _setupMainMean; set => _setupMainMean = value; }
+        public TimeSpan SetupMainSigma { get => _setupMainSigma; set => _setupMainSigma = value; }
+        public TimeSpan SetupPostMean { get => _setupPostMean; set => _setupPostMean = value; }
+        public TimeSpan SetupPostSigma { get => _setupPostSigma; set => _setupPostSigma = value; }
 
         public override bool Equals(object obj)
         {
