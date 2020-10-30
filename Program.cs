@@ -85,7 +85,7 @@ namespace ProduktionssystemSimulation
             // Simulationsdurchläufe mit und ohne Smart Service
             while (i < inputData["Iterations"])
             {
-                (List<Job>, List<Job>) tupelListJobs = Jobgenerator.JobgeneratorS(inputData);
+                (List<Job>, List<Job>) tupelListJobs = Jobgenerator.GenerateJobs(inputData);
                 
 
                 int seed = random.Next();
@@ -127,9 +127,9 @@ namespace ProduktionssystemSimulation
                     }
                 }
 
-                if (i == 250) Console.WriteLine("Quater.");
-                if (i == 500) Console.WriteLine("Half time.");
-                if (i == 750) Console.WriteLine("Three quarters.");
+                if (i == inputData["Iterations"]/4) Console.WriteLine("Quater.");
+                if (i == inputData["Iterations"]/2) Console.WriteLine("Half time.");
+                if (i == (inputData["Iterations"]*3)/4) Console.WriteLine("Three quarters.");
 
                 Console.WriteLine(i);
                 i++;

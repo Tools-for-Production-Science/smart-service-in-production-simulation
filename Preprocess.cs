@@ -6,11 +6,11 @@ namespace ProduktionssystemSimulation
 {
     public class Preprocess
     {
-        readonly ProcessControl pc;
-        readonly Simulation env;
-        readonly Analysis analysis;
-        readonly double downtimePreMean;
-        readonly double downtimePreSigma;
+        readonly private ProcessControl pc;
+        readonly private Simulation env;
+        readonly private Analysis analysis;
+        readonly private double downtimePreMean;
+        readonly private double downtimePreSigma;
 
         public Preprocess(ProcessControl pc, Simulation env, double downtimePreMean, double downtimePreSigma, Analysis analysis)
         {
@@ -26,7 +26,7 @@ namespace ProduktionssystemSimulation
             TimeSpan productionTime = env.RandLogNormal2(product.ProductionTimePreMean, product.ProductionTimePreSigma);
 
             // Für die KPI berechnung, die gesamt Zeit in der die Maschine läuft abspeichern.
-            analysis.APTPre = analysis.APTPre.Add(productionTime);
+            analysis.MachineWorkingTimePre = analysis.MachineWorkingTimePre.Add(productionTime);
 
             yield return env.Timeout(productionTime);
 
@@ -40,7 +40,7 @@ namespace ProduktionssystemSimulation
                 TimeSpan downtime = env.RandLogNormal2(TimeSpan.FromDays(downtimePreMean), TimeSpan.FromDays(downtimePreSigma));
 
                 // Ausfallzeit der Maschine für die Berechnung der KPI berechnen.
-                analysis.ADOTPre = analysis.ADOTPre.Add(downtime);
+                analysis.DowntimePre = analysis.DowntimePre.Add(downtime);
 
                 product.Broken = true;
 

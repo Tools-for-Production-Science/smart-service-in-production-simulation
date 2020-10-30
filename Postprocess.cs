@@ -6,11 +6,11 @@ namespace ProduktionssystemSimulation
 {
     class Postprocess
     {
-        readonly ProcessControl pc;
-        readonly Simulation env;
-        readonly Analysis analysis;
-        readonly double downtimePostMean;
-        readonly double downtimePostSigma;
+        readonly private ProcessControl pc;
+        readonly private Simulation env;
+        readonly private Analysis analysis;
+        readonly private double downtimePostMean;
+        readonly private double downtimePostSigma;
 
         public Postprocess(ProcessControl pc, Simulation env, double downtimePostMean, double downtimePostSigma, Analysis analysis)
         {
@@ -27,7 +27,7 @@ namespace ProduktionssystemSimulation
             TimeSpan ProductionTime = env.RandLogNormal2(product.ProductionTimePostMean, product.ProductionTimePostSigma);
 
             // Für die KPI berechnung, die gesamt Zeit in der die Maschine läuft abspeichern.
-            analysis.APTPost = analysis.APTPost.Add(ProductionTime);
+            analysis.MachineWorkingTimePost = analysis.MachineWorkingTimePost.Add(ProductionTime);
 
             yield return env.Timeout(ProductionTime);
 
@@ -41,7 +41,7 @@ namespace ProduktionssystemSimulation
                 TimeSpan downtime = env.RandLogNormal2(TimeSpan.FromDays(downtimePostMean), TimeSpan.FromDays(downtimePostSigma));
 
                 // Ausfallzeit der Maschine für die Berechnung der KPI berechnen.
-                analysis.ADOTPost = analysis.ADOTPost.Add(downtime);
+                analysis.DowntimePost = analysis.DowntimePost.Add(downtime);
                 product.Broken = true;
                 yield return env.Timeout(downtime);
                 pc.brokenPost = false;

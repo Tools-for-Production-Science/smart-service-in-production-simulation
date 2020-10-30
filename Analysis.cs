@@ -7,9 +7,9 @@ namespace ProduktionssystemSimulation
 {
     public class Analysis
     {
-        private TimeSpan _AUSTPre = TimeSpan.FromDays(0);
-        private TimeSpan _AUSTMain = TimeSpan.FromDays(0);
-        private TimeSpan _AUSTPost = TimeSpan.FromDays(0);
+        private TimeSpan _setupTimePre = TimeSpan.FromDays(0);
+        private TimeSpan _setupTimeMain = TimeSpan.FromDays(0);
+        private TimeSpan _setupTimePost = TimeSpan.FromDays(0);
         private double _QuantityOfReworkPre;
         private double _QuantityOfScrapPre;
         private double _QuantityOfReworkMain;
@@ -19,17 +19,17 @@ namespace ProduktionssystemSimulation
         private double _QuantityOfGoodMain;
         private double _QuantityOfGoodPost;
         private double _QuantityOfScrapPost;
-        private double _Costs = 0;
+        private double _totalCosts = 0;
         private double _NumberOfFailurePre;
         private double _NumberOfFailureMain;
         private double _NumberOfFailurePost;
         private List<Job> _FinishedJobs = new List<Job>();
-        private TimeSpan _MaschineAnPre = TimeSpan.FromDays(0);
-        private TimeSpan _MaschineAnMain = TimeSpan.FromDays(0);
-        private TimeSpan _MaschineAnPost = TimeSpan.FromDays(0);
-        private TimeSpan _DowntimePre = TimeSpan.FromDays(0);
-        private TimeSpan _ADOTMain = TimeSpan.FromDays(0);
-        private TimeSpan _ADOTPost = TimeSpan.FromDays(0);
+        private TimeSpan _machineWorkingTimePre = TimeSpan.FromDays(0);
+        private TimeSpan _machineWorkingTimeMain = TimeSpan.FromDays(0);
+        private TimeSpan _machineWorkingTimePost = TimeSpan.FromDays(0);
+        private TimeSpan _downtimePre = TimeSpan.FromDays(0);
+        private TimeSpan _downtimeMain = TimeSpan.FromDays(0);
+        private TimeSpan _downtimePost = TimeSpan.FromDays(0);
         double Revenue = 0;
         double LabourCosts = 0;
         double MaterialCosts = 0;
@@ -42,28 +42,28 @@ namespace ProduktionssystemSimulation
             InputData = inputData;
         }
 
-        public TimeSpan AUSTPre { get => _AUSTPre; set => _AUSTPre = value; }
+        public TimeSpan SetupTimePre { get => _setupTimePre; set => _setupTimePre = value; }
         public double QuantityOfReworkPre { get => _QuantityOfReworkPre; set => _QuantityOfReworkPre = value; }
         public double QuantityOfScrapPre { get => _QuantityOfScrapPre; set => _QuantityOfScrapPre = value; }
-        public TimeSpan APTPre { get => _MaschineAnPre; set => _MaschineAnPre = value; }
-        public TimeSpan APTMain { get => _MaschineAnMain; set => _MaschineAnMain = value; }
-        public TimeSpan APTPost { get => _MaschineAnPost; set => _MaschineAnPost = value; }
-        public TimeSpan ADOTPre { get => _DowntimePre; set => _DowntimePre = value; }
-        public TimeSpan ADOTMain { get => _ADOTMain; set => _ADOTMain = value; }
-        public TimeSpan ADOTPost { get => _ADOTPost; set => _ADOTPost = value; }
+        public TimeSpan MachineWorkingTimePre { get => _machineWorkingTimePre; set => _machineWorkingTimePre = value; }
+        public TimeSpan MachineWorkingTimeMain { get => _machineWorkingTimeMain; set => _machineWorkingTimeMain = value; }
+        public TimeSpan MachineWorkingTimePost { get => _machineWorkingTimePost; set => _machineWorkingTimePost = value; }
+        public TimeSpan DowntimePre { get => _downtimePre; set => _downtimePre = value; }
+        public TimeSpan DowntimeMain { get => _downtimeMain; set => _downtimeMain = value; }
+        public TimeSpan DowntimePost { get => _downtimePost; set => _downtimePost = value; }
         public double QuantityOfReworkMain { get => _QuantityOfReworkMain; set => _QuantityOfReworkMain = value; }
         public double QuantityOfScrapMain { get => _QuantityOfScrapMain; set => _QuantityOfScrapMain = value; }
         public double QuantityOfReworkPost { get => _QuantityOfReworkPost; set => _QuantityOfReworkPost = value; }
         public double QuantityOfScrapPost { get => _QuantityOfScrapPost; set => _QuantityOfScrapPost = value; }
-        public TimeSpan AUSTMain { get => _AUSTMain; set => _AUSTMain = value; }
-        public TimeSpan AUSTPost { get => _AUSTPost; set => _AUSTPost = value; }
+        public TimeSpan SetupTimeMain { get => _setupTimeMain; set => _setupTimeMain = value; }
+        public TimeSpan SetupTimePost { get => _setupTimePost; set => _setupTimePost = value; }
         public double QuantityOfGoodPre { get => _QuantityOfGoodPre; set => _QuantityOfGoodPre = value; }
         public double QuantityOfGoodMain { get => _QuantityOfGoodMain; set => _QuantityOfGoodMain = value; }
         public double QuantityOfGoodPost { get => _QuantityOfGoodPost; set => _QuantityOfGoodPost = value; }
         public double NumberOfFailurePre { get => _NumberOfFailurePre; set => _NumberOfFailurePre = value; }
         public double NumberOfFailureMain { get => _NumberOfFailureMain; set => _NumberOfFailureMain = value; }
         public double NumberOfFailurePost { get => _NumberOfFailurePost; set => _NumberOfFailurePost = value; }
-        public double Costs { get => _Costs; set => _Costs = value; }
+        public double Costs { get => _totalCosts; set => _totalCosts = value; }
         public Dictionary<string, double> InputData { get => _InputData; set => _InputData = value; }
         public List<Job> FinishedJobs { get => _FinishedJobs; set => _FinishedJobs = value; }
 
@@ -71,12 +71,12 @@ namespace ProduktionssystemSimulation
         {
             Dictionary<string, double> KPIs = new Dictionary<string, double>();
             double WorkingMinutes = InputData["WorkingHours"] * 60;
-            KPIs.Add("AvailabilityPre", (WorkingMinutes - AUSTPre.TotalMinutes - ADOTPre.TotalMinutes) / WorkingMinutes);
-            KPIs.Add("AvailabilityMain", (WorkingMinutes - AUSTMain.TotalMinutes - ADOTMain.TotalMinutes) / WorkingMinutes);
-            KPIs.Add("AvailabilityPost", (WorkingMinutes - AUSTPost.TotalMinutes - ADOTPost.TotalMinutes) / WorkingMinutes);
-            KPIs.Add("EffectivenessPre", (APTPre.TotalMinutes) / (InputData["CapacityPre"]*WorkingMinutes - AUSTPre.TotalMinutes - ADOTPre.TotalMinutes));
-            KPIs.Add("EffectivenessMain", (APTMain.TotalMinutes) / (WorkingMinutes - AUSTMain.TotalMinutes - ADOTMain.TotalMinutes));
-            KPIs.Add("EffectivenessPost", (APTPost.TotalMinutes) / (WorkingMinutes - AUSTPost.TotalMinutes - ADOTPost.TotalMinutes));
+            KPIs.Add("AvailabilityPre", (WorkingMinutes - SetupTimePre.TotalMinutes - DowntimePre.TotalMinutes) / WorkingMinutes);
+            KPIs.Add("AvailabilityMain", (WorkingMinutes - SetupTimeMain.TotalMinutes - DowntimeMain.TotalMinutes) / WorkingMinutes);
+            KPIs.Add("AvailabilityPost", (WorkingMinutes - SetupTimePost.TotalMinutes - DowntimePost.TotalMinutes) / WorkingMinutes);
+            KPIs.Add("EffectivenessPre", (MachineWorkingTimePre.TotalMinutes) / (WorkingMinutes - SetupTimePre.TotalMinutes - DowntimePre.TotalMinutes));
+            KPIs.Add("EffectivenessMain", (MachineWorkingTimeMain.TotalMinutes) / (WorkingMinutes - SetupTimeMain.TotalMinutes - DowntimeMain.TotalMinutes));
+            KPIs.Add("EffectivenessPost", (MachineWorkingTimePost.TotalMinutes) / (WorkingMinutes - SetupTimePost.TotalMinutes - DowntimePost.TotalMinutes));
             KPIs.Add("ThrouputratePre", (QuantityOfGoodPre + QuantityOfReworkPre) / InputData["WorkingHours"]);
             KPIs.Add("ThrouputrateMain", (QuantityOfGoodMain + QuantityOfReworkMain) / InputData["WorkingHours"]);
             KPIs.Add("ThrouputratePost", (QuantityOfGoodPost + QuantityOfReworkPost) / InputData["WorkingHours"]);
@@ -113,7 +113,7 @@ namespace ProduktionssystemSimulation
             if (NumberOfFailurePre != 0)
             {
                 KPIs.Add("MTBFPre", (InputData["WorkingHours"] / NumberOfFailurePre)/24 );
-                KPIs.Add("MTTRPre", ADOTPre.TotalDays / NumberOfFailurePre);
+                KPIs.Add("MTTRPre", DowntimePre.TotalDays / NumberOfFailurePre);
             }else
             {
                 KPIs.Add("MTBFPre", 0);
@@ -122,7 +122,7 @@ namespace ProduktionssystemSimulation
             if (NumberOfFailureMain != 0)
             {
                 KPIs.Add("MTBFMain", (InputData["WorkingHours"] / NumberOfFailureMain)/24);
-                KPIs.Add("MTTRMain", ADOTMain.TotalDays / NumberOfFailureMain);
+                KPIs.Add("MTTRMain", DowntimeMain.TotalDays / NumberOfFailureMain);
             }
             else
             {
@@ -132,7 +132,7 @@ namespace ProduktionssystemSimulation
             if (NumberOfFailurePost!=0)
             {
                 KPIs.Add("MTBFPost", (InputData["WorkingHours"] / NumberOfFailurePost)/24);
-                KPIs.Add("MTTRPost", ADOTPost.TotalDays / NumberOfFailurePost);
+                KPIs.Add("MTTRPost", DowntimePost.TotalDays / NumberOfFailurePost);
             }
             else
             {
@@ -147,7 +147,7 @@ namespace ProduktionssystemSimulation
 
         public double Profit()
         {
-            ManufactoringCosts = (3*InputData["WorkingHours"]-(ADOTPre.TotalHours + ADOTMain.TotalHours + ADOTPost.TotalHours))*InputData["MachineHourCosts"] + (3*InputData["WorkingHours"] - (ADOTPre.TotalHours + ADOTMain.TotalHours + ADOTPost.TotalHours + APTPre.TotalHours + APTMain.TotalHours + APTPost.TotalHours)) * InputData["MachineStandHourCosts"];
+            ManufactoringCosts = (3*InputData["WorkingHours"]-(DowntimePre.TotalHours + DowntimeMain.TotalHours + DowntimePost.TotalHours))*InputData["MachineHourCosts"] + (3*InputData["WorkingHours"] - (DowntimePre.TotalHours + DowntimeMain.TotalHours + DowntimePost.TotalHours + MachineWorkingTimePre.TotalHours + MachineWorkingTimeMain.TotalHours + MachineWorkingTimePost.TotalHours)) * InputData["MachineStandHourCosts"];
             foreach (Job j in FinishedJobs)
             {
                 foreach (Producttype p in j.Producttype)
@@ -160,7 +160,7 @@ namespace ProduktionssystemSimulation
                     }
                 }
             }
-            RepairCosts = ((ADOTPre.Add(ADOTMain).Add(ADOTPost)).TotalMinutes / 60) * InputData["HourlyWageFitter"];
+            RepairCosts = ((DowntimePre.Add(DowntimeMain).Add(DowntimePost)).TotalMinutes / 60) * InputData["HourlyWageFitter"];
             Costs = ManufactoringCosts + MaterialCosts + LabourCosts + RepairCosts;
 
             return Revenue-Costs;
