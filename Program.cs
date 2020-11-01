@@ -22,10 +22,12 @@ namespace ProduktionssystemSimulation
         static void Main(string[] args)
 #pragma warning restore IDE0060 // Nicht verwendete Parameter entfernen
         {
+            
             if(args.Length != 0)
             {
                 szenarioID = Convert.ToInt32(args[0]); 
             }
+            Console.WriteLine("SzenarioID: " + szenarioID);
             // Zeit messen, wie lange das Programm braucht
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
@@ -33,8 +35,8 @@ namespace ProduktionssystemSimulation
             // Konfigurationsfile einlesen
             // es können unterschiedliche Szenarien abgespeichert werden und oben in dem Array angegeben werden
             // mit der ID kann das gewünschte Szenario ausgewählt werden
-            string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data_" + szenario[szenarioID] + ".txt";
-            //string curFile = @"F:\data_" + szenario[szenarioID] + ".txt";
+            //string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data_" + szenario[szenarioID] + ".txt";
+            string curFile = @"F:\data_" + szenario[szenarioID] + ".txt";
             if (File.Exists(curFile))
             {
                 Console.WriteLine("File exists.");

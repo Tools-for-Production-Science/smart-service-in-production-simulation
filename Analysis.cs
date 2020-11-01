@@ -30,6 +30,7 @@ namespace ProduktionssystemSimulation
         private TimeSpan _downtimePre = TimeSpan.FromDays(0);
         private TimeSpan _downtimeMain = TimeSpan.FromDays(0);
         private TimeSpan _downtimePost = TimeSpan.FromDays(0);
+        private TimeSpan _jobExecutionTime = TimeSpan.FromDays(0);
         double Revenue = 0;
         double LabourCosts = 0;
         double MaterialCosts = 0;
@@ -66,6 +67,7 @@ namespace ProduktionssystemSimulation
         public double Costs { get => _totalCosts; set => _totalCosts = value; }
         public Dictionary<string, double> InputData { get => _InputData; set => _InputData = value; }
         public List<Job> FinishedJobs { get => _FinishedJobs; set => _FinishedJobs = value; }
+        public TimeSpan JobExecutionTime { get => _jobExecutionTime; set => _jobExecutionTime = value; }
 
         public Dictionary<string, double> CalculateKPIs()
         {
@@ -77,9 +79,9 @@ namespace ProduktionssystemSimulation
             KPIs.Add("EffectivenessPre", (MachineWorkingTimePre.TotalMinutes) / (WorkingMinutes - SetupTimePre.TotalMinutes - DowntimePre.TotalMinutes));
             KPIs.Add("EffectivenessMain", (MachineWorkingTimeMain.TotalMinutes) / (WorkingMinutes - SetupTimeMain.TotalMinutes - DowntimeMain.TotalMinutes));
             KPIs.Add("EffectivenessPost", (MachineWorkingTimePost.TotalMinutes) / (WorkingMinutes - SetupTimePost.TotalMinutes - DowntimePost.TotalMinutes));
-            KPIs.Add("ThrouputratePre", (QuantityOfGoodPre + QuantityOfReworkPre) / InputData["WorkingHours"]);
-            KPIs.Add("ThrouputrateMain", (QuantityOfGoodMain + QuantityOfReworkMain) / InputData["WorkingHours"]);
-            KPIs.Add("ThrouputratePost", (QuantityOfGoodPost + QuantityOfReworkPost) / InputData["WorkingHours"]);
+            KPIs.Add("ThrouputratePre", (QuantityOfGoodPre + QuantityOfReworkPre) / (MachineWorkingTimePre.TotalHours + SetupTimePre.TotalHours + DowntimePre.TotalHours));
+            KPIs.Add("ThrouputrateMain", (QuantityOfGoodMain + QuantityOfReworkMain) / (MachineWorkingTimeMain.TotalHours + SetupTimeMain.TotalHours + DowntimeMain.TotalHours));
+            KPIs.Add("ThrouputratePost", (QuantityOfGoodPost + QuantityOfReworkPost) / (MachineWorkingTimePost.TotalHours + SetupTimePost.TotalHours + DowntimePost.TotalHours));
             KPIs.Add("ScrapRatioPre", (QuantityOfScrapPre / (QuantityOfGoodPre + QuantityOfReworkPre + QuantityOfScrapPre)));
             KPIs.Add("ScrapRatioMain", (QuantityOfScrapMain / (QuantityOfGoodMain+ QuantityOfReworkMain + QuantityOfScrapMain)));
             KPIs.Add("ScrapRatioPost", (QuantityOfScrapPost / (QuantityOfGoodPost + QuantityOfReworkPost + QuantityOfScrapPost)));
@@ -160,7 +162,7 @@ namespace ProduktionssystemSimulation
                     }
                 }
             }
-            RepairCosts = ((DowntimePre.Add(DowntimeMain).Add(DowntimePost)).TotalMinutes / 60) * InputData["HourlyWageFitter"];
+            RepairCosts = ((DowntimePre.Add(DowntimeMain).Add(DowntimePost)).TotalHours) * InputData["HourlyWageFitter"];
             Costs = ManufactoringCosts + MaterialCosts + LabourCosts + RepairCosts;
 
             return Revenue-Costs;

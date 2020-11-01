@@ -4,7 +4,6 @@ using SimSharp;
 using System.Collections;
 using System.IO;
 
-
 namespace ProduktionssystemSimulation
 {
     public class ProcessControl 
@@ -57,7 +56,8 @@ namespace ProduktionssystemSimulation
         public IEnumerable<Event> Setup(Simulation env, Resource mPre, Resource mMain, Resource mPost, Job job)
         {
             StoreGet getPipe;
-            
+            DateTime start = env.Now;
+
             foreach (Producttype position in job.Producttype)
             {
                 producedProducts = new Store(env, (int)position.Quantity);
@@ -92,6 +92,7 @@ namespace ProduktionssystemSimulation
                 } 
             }
             finishedJobs.Add(job);
+            analysis.JobExecutionTime = analysis.JobExecutionTime.Add(env.Now.Subtract(start));
             yield break;
         }
 
