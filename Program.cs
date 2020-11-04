@@ -9,24 +9,24 @@ using SimSharp;
 
 namespace ProduktionssystemSimulation
 {
+    /*
+     * 
+     * Diese Klasse enthält die Main-Methode.
+     * Diese Klasse ist für die Simulationsdurchläufe verwantwortlich.
+     * 
+     */
     class Program
     {
         readonly static String[] szenario = new String[] { "alle", "Scrap_Rework", "MTBF_Downtime", "Scrap_Rework_OneYear", "Scrap_Rework_ThreeYears", "Scrap_Rework_FiveYears" };
-        static int szenarioID = 0;
+        static int szenarioID = 5;
         private static SmartService SmartService;
         readonly static Dictionary<string, double> inputData = new Dictionary<string, double>();
-        // Simulationsumgegbung wird hier schon erzeugt, da diese für die festlegung der Produktmenge benötigt wird
         static Random random = new Random();
 
 #pragma warning disable IDE0060 // Nicht verwendete Parameter entfernen
         static void Main(string[] args)
 #pragma warning restore IDE0060 // Nicht verwendete Parameter entfernen
         {
-            
-            if(args.Length != 0)
-            {
-                szenarioID = Convert.ToInt32(args[0]); 
-            }
             Console.WriteLine("SzenarioID: " + szenarioID);
             // Zeit messen, wie lange das Programm braucht
             Stopwatch stopWatch = new Stopwatch();
@@ -35,7 +35,6 @@ namespace ProduktionssystemSimulation
             // Konfigurationsfile einlesen
             // es können unterschiedliche Szenarien abgespeichert werden und oben in dem Array angegeben werden
             // mit der ID kann das gewünschte Szenario ausgewählt werden
-            //string curFile = @"C:\Users\kfausel\Documents\Simulation_BA\data_" + szenario[szenarioID] + ".txt";
             string curFile = @"F:\data_" + szenario[szenarioID] + ".txt";
             if (File.Exists(curFile))
             {
@@ -137,7 +136,6 @@ namespace ProduktionssystemSimulation
                 if (i == inputData["Iterations"]/2) Console.WriteLine("Half time.");
                 if (i == (inputData["Iterations"]*3)/4) Console.WriteLine("Three quarters.");
 
-                Console.WriteLine(i);
                 i++;
             }
 
@@ -151,6 +149,7 @@ namespace ProduktionssystemSimulation
             outputJobsSS.WriteLine("Job ID; Producttype ID; Quantity");
             outputJobsOSS.WriteLine("Job ID; Producttype ID; Quantity");
 
+            // Abgeschlossene Aufträge mit Smart Service in CSV schreiben
             foreach (List<Job> list in saveJobsSS)
             {
                 foreach (Job job in list)
@@ -165,6 +164,7 @@ namespace ProduktionssystemSimulation
                 }
             }
 
+            // Abgeschlossene Aufträge ohne Smart Service in CSV schreiben
             foreach (List<Job> list in saveJobsOSS)
             {
                 foreach (Job job in list)
@@ -183,6 +183,7 @@ namespace ProduktionssystemSimulation
             outputJobsSS.Close();
             outputJobsOSS.Close();
 
+            // geldwerter Vorteil berechnen
             double averageSS = GewinnSS.Average();
             double averageOSS = GewinnOSS.Average();
             double profit = averageSS - averageOSS;
@@ -196,7 +197,6 @@ namespace ProduktionssystemSimulation
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
         
-            // Format and display the TimeSpan value.
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.Milliseconds / 10);

@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using SimSharp;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.IO;
 
 namespace ProduktionssystemSimulation
 {
+    /*
+     * 
+     * Diese Klasse generiet die benätigenten Aufträge für die Simulation.
+     * Es werden zwei identische Listen mit den selben Aufträgen erzeugt.
+     * 
+     */
     public static class Jobgenerator
-    {  
+    {
+        // Simulationsumgegbung wird hier erzeugt, da diese für die Festlegung der Produktmenge benötigt wird
         private static Simulation env;
         static int seed = 42;
-        // Generiert die benötigenten Aufträge und speichert diese in einer Liste ab
         public static (List<Job>, List<Job>) GenerateJobs(Dictionary<string, double> inputData)
         {
             List<Job> Jobs1 = new List<Job>();

@@ -4,6 +4,13 @@ using SimSharp;
 
 namespace ProduktionssystemSimulation
 {
+    /*
+     * 
+     * Hauptprozess.
+     * Der Smart Service nimmt hier Einfluss.
+     * 
+     */
+
     class Mainprocess
     {
         readonly private ProcessControl pc;

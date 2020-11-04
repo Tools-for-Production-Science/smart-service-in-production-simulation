@@ -6,6 +6,12 @@ using System.IO;
 
 namespace ProduktionssystemSimulation
 {
+    /*
+     * 
+     * Diese Klasse steuert die Simulation.
+     * 
+     */
+
     public class ProcessControl 
     {
         readonly private Simulation env;
@@ -45,6 +51,7 @@ namespace ProduktionssystemSimulation
             this.env = env;
         }
 
+        // Diese Methode nimmt einen Auftrag und startet zunächst die Rüstung bevor die Produktion startet.
         public IEnumerable<Event> JobInProcess(Simulation env, Resource mPre, Resource mMain, Resource mPost, List<Job> jobs)
         {
             foreach (Job job in jobs)
@@ -53,6 +60,8 @@ namespace ProduktionssystemSimulation
             }
             yield break;
         }
+
+        // Rüstung der Maschinen und Start der Produktion für jedes Produkt.
         public IEnumerable<Event> Setup(Simulation env, Resource mPre, Resource mMain, Resource mPost, Job job)
         {
             StoreGet getPipe;
@@ -64,7 +73,7 @@ namespace ProduktionssystemSimulation
                 productsToProduce = new Store(env);
                 producedQuanity = 0;
                 position.TotalProducedQuantity = 0;
-                //SetUp
+                //  SetUp
                 TimeSpan setupPre = env.RandLogNormal2(position.SetupPreMean, position.SetupPreSigma);
                 analysis.SetupTimePre = analysis.SetupTimePre.Add(setupPre); 
                 TimeSpan setupMain = env.RandLogNormal2(position.SetupMainMean, position.SetupMainSigma);
@@ -72,15 +81,19 @@ namespace ProduktionssystemSimulation
                 TimeSpan setupPost = env.RandLogNormal2(position.SetupPostMean, position.SetupPostSigma);
                 analysis.SetupTimePost = analysis.SetupTimePost.Add(setupPost);
                 yield return env.Timeout(setupPre) & env.Timeout(setupMain) & env.Timeout(setupPost);
+
+                // Jedes Produkt wird in ein Store gespeichert, damit falls Ausschuss ist, dies wieder dem Store hinzugefügt wird und nochmals produziert werden kann
                 foreach (Product product in position.Products)
                 {
                     productsToProduce.Put(product);
                 }
 
+                // Produzieren den Auftrag solange, bis die Soll-Menge erreicht ist 
                 while (producedQuanity != position.Quantity)
                 {
+                    // Produkt aus Store nehmen.
                     getPipe = productsToProduce.Get();
-                    // warte bis ein neues Teil produziert werden muss, oder alle Teile schon produziert sind
+                    // Warten bis ein Produkt im Store ist oder bis alle produziert wurden.
                     yield return getPipe | producedProducts.WhenFull();
                     if (producedProducts.Count == position.Quantity)
                     {
@@ -88,6 +101,8 @@ namespace ProduktionssystemSimulation
                     }
                     Product product = (Product)getPipe.Value;
                     position.TotalProducedQuantity += 1;
+                    // hier kein yield return, weil möchten nicht, dass ein Produkt erst alle Maschinen durchläuft, 
+                    // sondern wollen, dass diese "gleichzeitig" den Prozess durchlaufen, sodass die Maschine nach fertigstellung eines Produktes sofort das nächte macht.
                     env.Process(Production(env, mPre, mMain, mPost, position, product, productsToProduce));
                 } 
             }
@@ -96,11 +111,19 @@ namespace ProduktionssystemSimulation
             yield break;
         }
 
+        // Die eigentliche Herstellung.
+        // Von hieraus werden die Maschinen angefragt, ob diese verfügbar sind und der Bearbeitungsschritt/Prozess gestartet
+        // und anschließende Überprüfung.
         public IEnumerable<Event> Production(Simulation env, Resource mPre, Resource mMain, Resource mPost, Producttype position, Product product, Store productsToProduce)
         {
+            // Maschine nach Verfügbarkeit anfragen.
             Request reqPre = mPre.Request();
+            // Warten bis Maschine verfügbar.
             yield return reqPre;
+            // Prozess Starten und warten bis dieser fertig ist, bevor die Überprüfung aufgerufen wird
             yield return processPre = env.Process(preprocess.ProductionStep(mPre, reqPre, product));
+            // Das Produkt kann kaputt gehen, wenn die Maschine Ausfällt. 
+            // Wenn Produkt wegen dem Maschinenausfall kaputt geht, muss es nicht Überprüft werden und kann gleich Aussortiert werden.
             if (!product.Broken) { yield return env.Process(ReviewRework.ReviewPre(env, position, product, analysis));}
             if (product.Broken)
             {
@@ -110,6 +133,8 @@ namespace ProduktionssystemSimulation
             }
             else
             {
+                // Wenn das Produkt nicht kaputt ist, wird der nächste Schritt ausgeführt. 
+                // Auch hier wieder erster die Verfügbarkeit anfragen.
                 var reqMain = mMain.Request();
                 yield return reqMain;
                 yield return processMain = env.Process(mainprocess.ProductionStep( mMain, reqMain, product));
@@ -147,6 +172,11 @@ namespace ProduktionssystemSimulation
             }
         }
 
+        // Ein Prozess kann unterbrochen werden, indem Interrupt() aufgerufen wird. 
+        // Daher wird der Vor-, Haupt- und Nachprozess obendrüber in Production() in einer Variable gespeichert, mit dem gerade laufenden Prozess.
+        // Es wird für jede Maschine eine eigene Methode benötigt, da immer der mit dieser Variable unterbrochen werden muss.
+        // Mittels dieser kann der Prozess unterbochen werden. 
+        // Dabei wird die IsOK-Flag des Prozesses auf false gesetzt und die HandleFaulte() wird in dem laufenden Prozess (also hier im preprocess) aufgerufen.
         public IEnumerable<Event> BreakMachinePreprocess(Simulation env)
         {
             while (true)
@@ -155,6 +185,11 @@ namespace ProduktionssystemSimulation
                 yield return env.Timeout(failure);
                 if (processPre != null && !brokenPre)
                 {
+                    // Es kann natürlich vorkammen, dass gerade kein Porzess existiert, aber es Zeit ist, dass die Maschine ausfällt. 
+                    // Dann wird solange versucht den Prozess zu unterbrechen, bis einer existiert, der auch unterbrochen werden kann.
+                    // Wird benötigt, wenn zum Beispiel die Maschinen vorne dran langersamer sind und somit eine hohe Leerlaufzeit existiert.
+                    // Der Bearbeitungsprozess muss also gestartet sein, damit die Maschine ausfallen kann.
+                    // Sie kann nicht im Leerlauf ausfallen.
                     do
                     {
                         if (processPre.IsOk && processPre.IsAlive)
@@ -225,6 +260,7 @@ namespace ProduktionssystemSimulation
             }
         }
 
+        // Startet die Simulation.
         public (Dictionary<string, double>,double, List<Job>) Simulate()
         {             
             Resource MPreprocess = new Resource(env, (int) inputData["CapacityPre"]);
