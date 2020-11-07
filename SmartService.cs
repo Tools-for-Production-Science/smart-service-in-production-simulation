@@ -2,25 +2,25 @@
 {
     public class SmartService
     {
-        private double _ssEffectDowntimeMean = 0;
-        private double _ssEffectMTBFMean = 0;
-        private double _ssEffectScrap = 0;
-        private double _ssEffectRework = 0;
-        private double _ssEffectDowntimeSigma = 0;
+        private double _smartServiceEffectDowntimeMean = 0;
+        private double _smartServiceEffectMTBFMean = 0;
+        private double _smartServiceEffectScrap = 0;
+        private double _smartServiceEffectRework = 0;
+        private double _smartServiceEffectDowntimeSigma = 0;
 
         public SmartService(double scrap, double mTBFMean, double downtimeMean, double downtimeSigma, double rework)
         {
-            SSEffectScrap = scrap;
-            SSEffectMTBFMean = mTBFMean;
-            SSEffectDowntimeMean = downtimeMean;
-            SSEffectRework = rework;
-            SSEffectDowntimeSigma = downtimeSigma;
+            smartServiceEffectScrap = scrap;
+            smartServiceEffectMTBFMean = mTBFMean;
+            smartServiceEffectDowntimeMean = downtimeMean;
+            smartServiceEffectRework = rework;
+            smartServiceEffectDowntimeSigma = downtimeSigma;
         }
         
-        public double SSEffectDowntimeMean { get => _ssEffectDowntimeMean; set => _ssEffectDowntimeMean = value; }
-        public double SSEffectScrap { get => _ssEffectScrap; set => _ssEffectScrap = value; }
-        public double SSEffectMTBFMean { get => _ssEffectMTBFMean; set => _ssEffectMTBFMean = value; }
-        public double SSEffectRework { get => _ssEffectRework; set => _ssEffectRework = value; }
-        public double SSEffectDowntimeSigma { get => _ssEffectDowntimeSigma; set => _ssEffectDowntimeSigma = value; }
+        public double smartServiceEffectDowntimeMean { get => _smartServiceEffectDowntimeMean; set => _smartServiceEffectDowntimeMean = value; }
+        public double smartServiceEffectScrap { get => _smartServiceEffectScrap; set => _smartServiceEffectScrap = value; }
+        public double smartServiceEffectMTBFMean { get => _smartServiceEffectMTBFMean; set => _smartServiceEffectMTBFMean = value; }
+        public double smartServiceEffectRework { get => _smartServiceEffectRework; set => _smartServiceEffectRework = value; }
+        public double smartServiceEffectDowntimeSigma { get => _smartServiceEffectDowntimeSigma; set => _smartServiceEffectDowntimeSigma = value; }
     }
 }

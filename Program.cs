@@ -17,7 +17,7 @@ namespace ProduktionssystemSimulation
      */
     class Program
     {
-        readonly static String[] szenario = new String[] { "alle", "Scrap_Rework", "MTBF_Downtime", "Scrap_Rework_OneYear", "Scrap_Rework_ThreeYears", "Scrap_Rework_FiveYears" };
+        readonly static String[] szenario = new String[] { "alle", "Scrap_Rework", "MTBF_Downtime", "Scrap_Rework_OneYear", "Scrap_Rework_TwoYears", "Scrap_Rework_ThreeYears" };
         static int szenarioID = 5;
         private static SmartService SmartService;
         readonly static Dictionary<string, double> inputData = new Dictionary<string, double>();
@@ -57,11 +57,11 @@ namespace ProduktionssystemSimulation
             }
 
             SmartService = new SmartService(
-                inputData["Scrap"],
-                inputData["MTBFMean"],
-                inputData["DowntimeMean"],
-                inputData["DowntimeSigma"],
-                inputData["Rework"]
+                inputData["SmartServiceEffectScrap"],
+                inputData["SmartServiceEffectMTBFMean"],
+                inputData["SmartServiceEffectDowntimeMean"],
+                inputData["SmartServiceEffectDowntimeSigma"],
+                inputData["SmartServiceEffectRework"]
             );
 
             SmartService withoutSmartService = new SmartService(
@@ -72,11 +72,11 @@ namespace ProduktionssystemSimulation
                 0
             );
 
-            StreamWriter outputSS = new StreamWriter("Output_SS_"+szenario[szenarioID]+ ".csv");
-            StreamWriter outputOSS = new StreamWriter("Output_OSS_" + szenario[szenarioID] + ".csv");
+            StreamWriter outputSS = new StreamWriter("Output_smartService_" + szenario[szenarioID]+ ".csv");
+            StreamWriter outputOSS = new StreamWriter("Output_ohneSmartService_" + szenario[szenarioID] + ".csv");
 
-            List<double> GewinnSS = new List<double>();
-            List<double> GewinnOSS = new List<double>();
+            List<double> GewinnSmartService = new List<double>();
+            List<double> GewinnOhneSmartService = new List<double>();
             List<List<Job>> saveJobsSS = new List<List<Job>>();
             List<List<Job>> saveJobsOSS = new List<List<Job>>();
 
@@ -102,7 +102,7 @@ namespace ProduktionssystemSimulation
                 saveJobsSS.Add(tupelKPIProfitSS.Item3);
 
                 // Gewinn für den geldwerten Vorteil speichern, damit der Durchschnitt errechnet werden kann
-                GewinnSS.Add(tupelKPIProfitSS.Item2);
+                GewinnSmartService.Add(tupelKPIProfitSS.Item2);
 
                 // KPIs und den Gewinn in CSV schreiben
                 foreach (var pair in tupelKPIProfitSS.Item1)
@@ -120,7 +120,7 @@ namespace ProduktionssystemSimulation
                 saveJobsOSS.Add(tupelKPIProfitOSS.Item3);
 
                 // Gewinn für den geldwerten Vorteil speichern, damit der Durchschnitt errechnet werden kann
-                GewinnOSS.Add(tupelKPIProfitOSS.Item2);
+                GewinnOhneSmartService.Add(tupelKPIProfitOSS.Item2);
 
                 //swGOSS.WriteLine(tupelKPIProfit.Item2);
                 foreach (var pair in tupelKPIProfitOSS.Item1)
@@ -143,8 +143,8 @@ namespace ProduktionssystemSimulation
             outputOSS.Close();
 
             StreamWriter monetaryBenefit = new StreamWriter("GeldwerterVorteil_" + szenario[szenarioID] + ".csv");
-            StreamWriter outputJobsSS = new StreamWriter("Output_Jobs_SS_" + szenario[szenarioID] + ".csv");
-            StreamWriter outputJobsOSS = new StreamWriter("Output_Jobs_OSS_" + szenario[szenarioID] + ".csv");
+            StreamWriter outputJobsSS = new StreamWriter("Output_Jobs_SmartService_" + szenario[szenarioID] + ".csv");
+            StreamWriter outputJobsOSS = new StreamWriter("Output_Jobs_OhneSmartService_" + szenario[szenarioID] + ".csv");
 
             outputJobsSS.WriteLine("Job ID; Producttype ID; Quantity");
             outputJobsOSS.WriteLine("Job ID; Producttype ID; Quantity");
@@ -184,12 +184,12 @@ namespace ProduktionssystemSimulation
             outputJobsOSS.Close();
 
             // geldwerter Vorteil berechnen
-            double averageSS = GewinnSS.Average();
-            double averageOSS = GewinnOSS.Average();
+            double averageSS = GewinnSmartService.Average();
+            double averageOSS = GewinnOhneSmartService.Average();
             double profit = averageSS - averageOSS;
 
-            monetaryBenefit.WriteLine("Gewinn Average SS: {0}", averageSS);
-            monetaryBenefit.WriteLine("Gewinn Average OSS: {0}", averageOSS);
+            monetaryBenefit.WriteLine("Gewinn Average Smart Service: {0}", averageSS);
+            monetaryBenefit.WriteLine("Gewinn Average ohne Smart Service: {0}", averageOSS);
             monetaryBenefit.WriteLine("Geldwerter Vorteil: {0}", profit);
             monetaryBenefit.Close();
             

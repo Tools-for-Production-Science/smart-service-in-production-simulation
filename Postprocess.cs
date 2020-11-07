@@ -4,6 +4,11 @@ using SimSharp;
 
 namespace ProduktionssystemSimulation
 {
+    /*
+     * 
+     * Diese Klasse stellt den Nachprozess dar.
+     * 
+     */
     class Postprocess
     {
         readonly private ProcessControl pc;

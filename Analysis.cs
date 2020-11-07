@@ -5,6 +5,11 @@ using System.Collections.Generic;
 
 namespace ProduktionssystemSimulation
 {
+    /*
+     * 
+     * Diese Klasse berechnet den Gewinn und die KPIs eines Simulationsduchlaufs.
+     * 
+     */
     public class Analysis
     {
         private TimeSpan _setupTimePre = TimeSpan.FromDays(0);

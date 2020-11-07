@@ -4,6 +4,11 @@ using SimSharp;
 
 namespace ProduktionssystemSimulation
 {
+    /*
+     * 
+     * Diese Klasse stellt den Vorporzess dar.
+     * 
+     */
     public class Preprocess
     {
         readonly private ProcessControl pc;
