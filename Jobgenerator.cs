@@ -43,26 +43,26 @@ namespace ProduktionssystemSimulation
                     {
                         Products1.Add(new Product(
                             p,
-                            TimeSpan.FromDays(inputData["ProductionTimeProductPreMean"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductMainMean"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductPostMean"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductPreSigma"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductMainSigma"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductPostSigma"]),
-                            TimeSpan.FromDays(inputData["ReworkTimeMean"]),
-                            TimeSpan.FromDays(inputData["ReworkTimeSigma"])
+                            TimeSpan.FromDays(inputData[$"ProductionTimeProductPreMean{t}"]),
+                            TimeSpan.FromDays(inputData[$"ProductionTimeProductMainMean{t}"]),
+                            TimeSpan.FromDays(inputData[$"ProductionTimeProductPostMean{t}"]),
+                            TimeSpan.FromDays(inputData[$"ProductionTimeProductPreSigma{t}"]),
+                            TimeSpan.FromDays(inputData[$"ProductionTimeProductMainSigma{t}"]),
+                            TimeSpan.FromDays(inputData[$"ProductionTimeProductPostSigma{t}"]),
+                            TimeSpan.FromDays(inputData[$"ReworkTimeMean{t}"]),
+                            TimeSpan.FromDays(inputData[$"ReworkTimeSigma{t}"])
                             ));
 
                         Products2.Add(new Product(
                             p,
-                            TimeSpan.FromDays(inputData["ProductionTimeProductPreMean"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductMainMean"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductPostMean"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductPreSigma"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductMainSigma"]),
-                            TimeSpan.FromDays(inputData["ProductionTimeProductPostSigma"]),
-                            TimeSpan.FromDays(inputData["ReworkTimeMean"]),
-                            TimeSpan.FromDays(inputData["ReworkTimeSigma"])
+                            TimeSpan.FromDays(inputData[$"ProductionTimeProductPreMean{t}"]),
+                            TimeSpan.FromDays(inputData[$"ProductionTimeProductMainMean{t}"]),
+                            TimeSpan.FromDays(inputData[$"ProductionTimeProductPostMean{t}"]),
+                            TimeSpan.FromDays(inputData[$"ProductionTimeProductPreSigma{t}"]),
+                            TimeSpan.FromDays(inputData[$"ProductionTimeProductMainSigma{t}"]),
+                            TimeSpan.FromDays(inputData[$"ProductionTimeProductPostSigma{t}"]),
+                            TimeSpan.FromDays(inputData[$"ReworkTimeMean{t}"]),
+                            TimeSpan.FromDays(inputData[$"ReworkTimeSigma{t}"])
                             ));
                     }
 

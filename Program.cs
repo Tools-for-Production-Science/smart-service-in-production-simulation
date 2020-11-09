@@ -17,8 +17,8 @@ namespace ProduktionssystemSimulation
      */
     class Program
     {
-        readonly static String[] szenario = new String[] { "alle", "Scrap_Rework", "MTBF_Downtime", "Scrap_Rework_OneYear", "Scrap_Rework_TwoYears", "Scrap_Rework_ThreeYears" };
-        static int szenarioID = 5;
+        readonly static String[] szenario = new String[] { "", "_alle", "_Scrap_Rework", "_MTBF_Downtime", "_Scrap_Rework_OneYear", "_Scrap_Rework_TwoYears", "_Scrap_Rework_ThreeYears" };
+        static int szenarioID = 0;
         private static SmartService SmartService;
         readonly static Dictionary<string, double> inputData = new Dictionary<string, double>();
         static Random random = new Random();
@@ -35,7 +35,7 @@ namespace ProduktionssystemSimulation
             // Konfigurationsfile einlesen
             // es können unterschiedliche Szenarien abgespeichert werden und oben in dem Array angegeben werden
             // mit der ID kann das gewünschte Szenario ausgewählt werden
-            string curFile = @"F:\data_" + szenario[szenarioID] + ".txt";
+            string curFile = "data" + szenario[szenarioID] + ".txt";
             if (File.Exists(curFile))
             {
                 Console.WriteLine("File exists.");

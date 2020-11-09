@@ -46,7 +46,7 @@ namespace ProduktionssystemSimulation
             {
                 pc.brokenMain = true;
 
-                TimeSpan downtime = TimeSpan.FromDays(env.RandLogNormal2(downtimeMainMean* (1  - smartService.SSEffectDowntimeMean),downtimeMainSigma * (1 - smartService.SSEffectDowntimeSigma)) );
+                TimeSpan downtime = TimeSpan.FromDays(env.RandLogNormal2(downtimeMainMean* (1  - smartService.smartServiceEffectDowntimeMean),downtimeMainSigma * (1 - smartService.smartServiceEffectDowntimeSigma)) );
                 // Ausfallzeit der Maschine für die Berechnung der KPI berechnen.
                 analysis.DowntimeMain = analysis.DowntimeMain.Add(downtime);
 
