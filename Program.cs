@@ -135,7 +135,7 @@ namespace ProduktionssystemSimulation
                 if (i == inputData["Iterations"]/4) Console.WriteLine("Quater.");
                 if (i == inputData["Iterations"]/2) Console.WriteLine("Half time.");
                 if (i == (inputData["Iterations"]*3)/4) Console.WriteLine("Three quarters.");
-
+                Console.WriteLine(i);
                 i++;
             }
 

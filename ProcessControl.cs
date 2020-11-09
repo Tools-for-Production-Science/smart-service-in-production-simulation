@@ -54,10 +54,13 @@ namespace ProduktionssystemSimulation
         // Diese Methode nimmt einen Auftrag und startet zunächst die Rüstung bevor die Produktion startet.
         public IEnumerable<Event> JobInProcess(Simulation env, Resource mPre, Resource mMain, Resource mPost, List<Job> jobs)
         {
-            foreach (Job job in jobs)
+            PriorityStore priorityStore = new PriorityStore(env);
+            foreach (Job j in jobs)
             {
-                yield return env.Process(Setup(env, mPre, mMain, mPost, job));
+                priorityStore.Put(j, j.Priority);                
+                   
             }
+            yield return env.Process(Setup(env, mPre, mMain, mPost, (Job)priorityStore.Get().Value));
             yield break;
         }
 
