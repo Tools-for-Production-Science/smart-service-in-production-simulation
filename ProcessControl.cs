@@ -60,7 +60,11 @@ namespace ProduktionssystemSimulation
                 priorityStore.Put(j, j.Priority);                
                    
             }
-            yield return env.Process(Setup(env, mPre, mMain, mPost, (Job)priorityStore.Get().Value));
+            while(priorityStore.Count != 0)
+            {
+                yield return env.Process(Setup(env, mPre, mMain, mPost, (Job)priorityStore.Get().Value));
+            }
+            
             yield break;
         }
 
