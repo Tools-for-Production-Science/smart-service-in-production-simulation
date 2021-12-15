@@ -15,7 +15,6 @@ namespace ProduktionssystemSimulation
         // Simulationsumgegbung wird hier erzeugt, da diese für die Festlegung der Produktmenge benötigt wird
         private static Simulation env;
         static int seed = 42;
-        static Random random = new Random();
 
         public static (List<Job>, List<Job>) GenerateJobs(Dictionary<string, double> inputData)
         {
@@ -108,9 +107,8 @@ namespace ProduktionssystemSimulation
                         TimeSpan.FromDays(inputData[$"SetupTimePostSigma{t}"])
                         ));
                 }
-                int rInt = random.Next(0, 100);
-                Jobs1.Add(new Job(rInt, j, Producttype1));
-                Jobs2.Add(new Job(rInt, j, Producttype2));
+                Jobs1.Add(new Job(j, j, Producttype1));
+                Jobs2.Add(new Job(j, j, Producttype2));
             }
             
             return (Jobs1, Jobs2);
