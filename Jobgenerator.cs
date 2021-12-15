@@ -2,35 +2,35 @@
 using System.Collections.Generic;
 using SimSharp;
 
-namespace ProduktionssystemSimulation
+namespace ProductionsystemSimulation
 {
     /*
      * 
-     * Diese Klasse generiet die benätigenten Aufträge für die Simulation.
-     * Es werden zwei identische Listen mit den selben Aufträgen erzeugt.
+     * This class generates the required orders for the simulation
+     * Two identical lists with the same orders are generated
      * 
      */
     public static class Jobgenerator
     {
-        // Simulationsumgegbung wird hier erzeugt, da diese für die Festlegung der Produktmenge benötigt wird
+        // Simulation environment is generated here, as this is required for the determination of the product quantity
         private static Simulation env;
         static int seed = 42;
 
         public static (List<Job>, List<Job>) GenerateJobs(Dictionary<string, double> inputData)
         {
-            List<Job> Jobs1 = new List<Job>();
-            List<Job> Jobs2 = new List<Job>();
+            List<Job> Jobs1 = new();
+            List<Job> Jobs2 = new();
             env = new Simulation(randomSeed: seed);
             seed += 567;
             for (int j = 1; j <= inputData["NumberOfJobs"]; j = 1+j)
             {
-                List<Producttype> Producttype1 = new List<Producttype>();
-                List<Producttype> Producttype2 = new List<Producttype>();
+                List<Producttype> Producttype1 = new();
+                List<Producttype> Producttype2 = new();
 
                 for (int t = 1; t <= inputData["NumberPosition"]; t++)
                 {
-                    List<Product> Products1 = new List<Product>();
-                    List<Product> Products2 = new List<Product>();
+                    List<Product> Products1 = new();
+                    List<Product> Products2 = new();
                     int ProductQuantity;
 
                     do
@@ -107,6 +107,7 @@ namespace ProduktionssystemSimulation
                         TimeSpan.FromDays(inputData[$"SetupTimePostSigma{t}"])
                         ));
                 }
+                // The ID is also passed as a Prio, so that the order in which the jobs are processed is identical for the runs with and without Smart Service
                 Jobs1.Add(new Job(j, j, Producttype1));
                 Jobs2.Add(new Job(j, j, Producttype2));
             }

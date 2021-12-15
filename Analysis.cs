@@ -3,11 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 
 
-namespace ProduktionssystemSimulation
+namespace ProductionsystemSimulation
 {
     /*
      * 
-     * Diese Klasse berechnet den Gewinn und die KPIs eines Simulationsduchlaufs.
+     * This class calculates the profit and the KPIs of a simulation run
      * 
      */
     public class Analysis

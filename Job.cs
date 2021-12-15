@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ProduktionssystemSimulation
+namespace ProductionsystemSimulation
 {
     public class Job
     {

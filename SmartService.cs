@@ -1,4 +1,4 @@
-﻿namespace ProduktionssystemSimulation
+﻿namespace ProductionsystemSimulation
 {
     public class SmartService
     {

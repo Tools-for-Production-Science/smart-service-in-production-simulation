@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using SimSharp;
 
-namespace ProduktionssystemSimulation
+namespace ProductionsystemSimulation
 {
     /*
      * 
-     * Diese Klasse stellt den Nachprozess dar.
+     * This class represents the post-process
      * 
      */
     class Postprocess
@@ -28,31 +28,29 @@ namespace ProduktionssystemSimulation
 
         public IEnumerable<Event> ProductionStep(Resource machine, Request req, Product product)
         {
-            //Env.Log("{0} ProductNo {1}: Machine Postprocess is in production", Env.Now, product.ID);
             TimeSpan ProductionTime = env.RandLogNormal2(product.ProductionTimePostMean, product.ProductionTimePostSigma);
 
-            // Für die KPI berechnung, die gesamt Zeit in der die Maschine läuft abspeichern.
+            // For the KPI calculation, save the total time the machine is running
             analysis.MachineWorkingTimePost = analysis.MachineWorkingTimePost.Add(ProductionTime);
 
             yield return env.Timeout(ProductionTime);
 
-            // Wenn ein Prozess unterbrochen wird, muss die Iteratormethode HandleFault () aufrufen, 
-            // bevor weitere Ereignisse ausgegeben werden können.
-            // Diese Methode muss aufgerufen werden, um das IsOk-Flag des Prozesses auf true zurückzusetzen.
+            // When a process is interrupted, the HandleFault () iterator method must be called before further events can be emitted
+            // This method must be called to reset the IsOk flag of the process to true
             if (env.ActiveProcess.HandleFault())
             {
                 pc.brokenPost = true;
 
                 TimeSpan downtime = env.RandLogNormal2(TimeSpan.FromDays(downtimePostMean), TimeSpan.FromDays(downtimePostSigma));
 
-                // Ausfallzeit der Maschine für die Berechnung der KPI berechnen.
+                // Calculate downtime of the machine for the calculation of the KPI
                 analysis.DowntimePost = analysis.DowntimePost.Add(downtime);
                 product.Broken = true;
                 yield return env.Timeout(downtime);
                 pc.brokenPost = false;
             }
 
-            // Maschine wieder frei geben, sobald das Produkt fertig produziert ist.
+            // Release the machine again as soon as the product has been produced
             machine.Release(req);
         }
 

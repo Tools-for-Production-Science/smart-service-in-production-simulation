@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using SimSharp;
 
-namespace ProduktionssystemSimulation
+namespace ProductionsystemSimulation
 {
     /*
      * 
-     * Hauptprozess.
-     * Der Smart Service nimmt hier Einfluss.
+     * Mainprocess
+     * The Smart Service takes influence here
      * 
      */
 
@@ -34,20 +34,19 @@ namespace ProduktionssystemSimulation
         {
             TimeSpan ProductionTime = env.RandNormalPositive(product.ProductionTimeMainMean, product.ProductionTimeMainSigma);
 
-            // Für die KPI berechnung, die gesamt Zeit in der die Maschine läuft abspeichern.
+            // For the KPI calculation, save the total time the machine is running
             analysis.MachineWorkingTimeMain = analysis.MachineWorkingTimeMain.Add(ProductionTime);
 
             yield return env.Timeout(ProductionTime);
 
-            // Wenn ein Prozess unterbrochen wird, muss die Iteratormethode HandleFault () aufrufen, 
-            // bevor weitere Ereignisse ausgegeben werden können.
-            // Diese Methode muss aufgerufen werden, um das IsOk-Flag des Prozesses auf true zurückzusetzen.
+            // When a process is interrupted, the HandleFault() iterator method must be called before further events can be issued
+            // This method must be called to reset the IsOk flag of the process to true
             if (env.ActiveProcess.HandleFault())
             {
                 pc.brokenMain = true;
 
                 TimeSpan downtime = TimeSpan.FromDays(env.RandLogNormal2(downtimeMainMean* (1  - smartService.smartServiceEffectDowntimeMean),downtimeMainSigma * (1 - smartService.smartServiceEffectDowntimeSigma)) );
-                // Ausfallzeit der Maschine für die Berechnung der KPI berechnen.
+                // Calculate downtime of the machine for the calculation of the KPI
                 analysis.DowntimeMain = analysis.DowntimeMain.Add(downtime);
 
                 product.Broken = true;
@@ -55,7 +54,7 @@ namespace ProduktionssystemSimulation
                 pc.brokenMain = false;
             }
 
-            // Maschine wieder frei geben, sobald das Produkt fertig produziert ist.
+            // Release the machine again as soon as the product has been produced
             machine.Release(req);
         }
 
