@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/443986666.svg)](https://zenodo.org/badge/latestdoi/443986666)
+
 # Introduction
 
 This code implements a simulation of a smart service in a production system in order to estimate its impact on KPIs. To limit the effort, the production system is modelled as a three stage process: The first stage aggregates all real processes taking place before the smart service, the second stage is the process influenced by the smart service, and the third stage sums up all processes happening after the smart service.
