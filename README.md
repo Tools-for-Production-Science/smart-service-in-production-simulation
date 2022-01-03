@@ -4,7 +4,7 @@ This code implements a simulation of a smart service in a production system in o
 
 <h1 align="center">
     <a href="https://github.com/Tools-for-Production-Science/dynamic-pricing-in-production-networks" title="Smart Service Simulation">
-    <img width=90% alt="" src="https://github.com/Tools-for-Production-Science/smart-service-in-production-simulation/blob/main/Concept.jpg"> </a>
+    <img width=90% alt="" src="https://github.com/Tools-for-Production-Science/smart-service-in-production-simulation/blob/master/Concept.jpg"> </a>
     <br>
 </h1>
 
@@ -13,7 +13,7 @@ A manfucaturer wants to estimate the impact of a predictive maintenance system f
 
 <h1 align="center">
     <a href="https://github.com/Tools-for-Production-Science/dynamic-pricing-in-production-networks" title="Smart Service Simulation">
-    <img width=90% alt="" src="https://github.com/Tools-for-Production-Science/smart-service-in-production-simulation/blob/main/Example.png"> </a>
+    <img width=90% alt="" src="https://github.com/Tools-for-Production-Science/smart-service-in-production-simulation/blob/master/Example.png"> </a>
     <br>
 </h1>
 
